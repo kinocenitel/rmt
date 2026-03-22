@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Матрица рисков</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjEzIiBoZWlnaHQ9IjEzIiByeD0iMyIgZmlsbD0iIzgxYzc4NCIvPgogIDxyZWN0IHg9IjE4IiB5PSIxIiB3aWR0aD0iMTMiIGhlaWdodD0iMTMiIHJ4PSIzIiBmaWxsPSIjZjlhODI1Ii8+CiAgPHJlY3QgeD0iMSIgeT0iMTgiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjMiIGZpbGw9IiNlNjUxMDAiLz4KICA8cmVjdCB4PSIxOCIgeT0iMTgiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjMiIGZpbGw9IiNiNzFjMWMiLz4KPC9zdmc+"><script>if(localStorage.getItem("rm_theme")==="dark")document.documentElement.classList.add("dark-early");</script><script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+</head>
+<body style="margin:0;padding:16px;visibility:hidden;">
+<style>
+  * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+  *, *::before, *::after { box-sizing: border-box; }
+
+  /* Светлая тема (по умолчанию) */
+  body {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-input: #ffffff;
+    --bg-modal: #ffffff;
+    --bg-hover: #f0f0f0;
+    --text-primary: #383838;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --border: #c0c0c0;
+    --border-light: #e0e0e0;
+    --tooltip-bg: var(--bg-modal);
+    --tooltip-border: var(--border);
+    --tooltip-text: var(--text-primary);
+    --btn-bg: #ffffff;
+    --btn-text: #383838;
+    --cancel-hover: #f5f5f5;
+    --danger-hover: #fff5f5;
+    --border-hover: #a0a0a0;
+    background: var(--bg);
+    color: var(--text-primary);
+  }
+
+  /* Темная тема */
+  body.dark {
+    --bg: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-input: #2d2d2d;
+    --bg-modal: #252526;
+    --bg-hover: #3a3a3a;
+    --text-primary: #d4d4d4;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --border: #454545;
+    --border-light: #3a3a3a;
+    --btn-bg: #2d2d2d;
+    --btn-text: #d4d4d4;
+    --cancel-hover: #333333;
+    --danger-hover: #2d1f1f;
+    --border-hover: #666666;
+    background: var(--bg);
+  }
+
+  /* Применяется до загрузки JS для предотвращения мерцания */
+  html.dark-early body {
+    background: #1e1e1e;
+    color: #d4d4d4;
+  }
+
+  /* Кнопка переключения темы */
+  .theme-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--text-secondary); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s ease, background 0.15s; }
+  .theme-toggle:hover { background: var(--bg-hover); transform: scale(1.15); }
+  .scroll-top { position: fixed; bottom: 60px; left: 24px; z-index: 50; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--text-secondary); cursor: pointer; font-size: 16px; display: none; align-items: center; justify-content: center; transition: opacity 0.2s, transform 0.2s; opacity: 0.5; }
+  .scroll-top:hover { background: var(--bg-hover); opacity: 1; }
+  .scroll-top.visible { display: flex; }
+
+  .wrap { padding: 1rem 0; font-size: 14px; color: var(--text-primary); }
+  .grid-section { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .matrix-container { flex: 1 1 340px; min-width: 300px; }
+
+  .matrix-layout { display: flex; gap: 0; }
+  .left-axis { display: flex; align-items: stretch; justify-content: center; gap: 4px; flex-direction: row; width: 60px; flex-shrink: 0; overflow: visible; }
+  .left-axis-label { font-size: 14px; font-weight: 600; color: var(--text-secondary); transform: rotate(-90deg); white-space: nowrap; width: 20px; flex-shrink: 0; display: block; align-self: center; }
+  .left-nums-col { display: flex; flex-direction: column; width: 18px; gap: 2px; }
+  .left-num { font-size: 11px; color: var(--text-muted); text-align: right; display: flex; align-items: center; justify-content: flex-end; flex: 1; }
+
+  .matrix-right { flex: 1; }
+  .matrix-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 2px; aspect-ratio: 1; }
+  .cell { border-radius: 8px; position: relative; overflow: hidden; }
+
+  .bottom-row { display: flex; margin-top: 4px; }
+  .bottom-num { flex: 1; text-align: center; font-size: 11px; color: var(--text-muted); }
+
+  .bottom-axis-row { display: flex; align-items: center; margin-top: 8px; }
+  .bottom-axis-label { flex: 1; text-align: center; font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+
+  .cell-dot { border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-weight: 500; color: #fff; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; flex-shrink: 0; position: absolute; }
+  .cell-dot:hover { transform: scale(1.2); z-index: 5; }
+  .cell-dot.highlighted { transform: scale(1.35); border-color: #fff; box-shadow: 0 0 0 2.5px rgba(255,255,255,0.9); z-index: 6; }
+  #global-tooltip { position: fixed; background: var(--tooltip-bg); border: 1px solid var(--tooltip-border); border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--tooltip-text); white-space: normal; max-width: 220px; line-height: 1.4; pointer-events: none; z-index: 9999; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
+  .legend { display: flex; gap: 12px; margin-top: 26px; margin-left: 60px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--text-secondary); }
+  .legend-box { width: 16px; height: 16px; border-radius: 4px; }
+
+  .sidebar { flex: 1 1 270px; min-width: 240px; }
+  .risk-form { background: var(--bg-secondary); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+  .risk-form label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; margin-top: 10px; }
+  .risk-form label:first-of-type { margin-top: 10px; }
+  .risk-form input[type=text] { width: 100%; height: 30px; font-size: 14px; cursor: text; border-radius: 8px; border: 1.5px solid var(--border); outline: none; padding: 0 8px; background: var(--bg-input); color: var(--text-primary); }
+  .risk-form input[type=text]:focus { border: 1.5px solid #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .risk-form input[type=text].error { border: 1.5px solid #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,0.15); }
+  .error-msg { font-size: 11px; color: #e53935; margin-top: 4px; display: none; }
+  .error-msg.visible { display: block; }
+  .risk-form select { width: 100%; height: 30px; font-size: 14px; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); outline: none; padding: 0 8px; background-color: var(--bg-input); color: var(--text-primary); -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 20px center; }
+  .risk-form select:focus { border: 1.5px solid #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .add-btn { margin-top: 12px; width: 100%; height: 40px; font-size: 14px; font-weight: 600; padding: 7px; cursor: pointer; background: #2196f3; color: #ffffff; border: none; border-radius: 8px; }
+  .add-btn:hover { background: #1976d2; color: #ffffff; }
+
+  .risk-list { display: flex; flex-direction: column; gap: 6px; }
+  .sort-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .filter-wrap { position: relative; margin-left: auto; }
+  .filter-btn { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: color 0.15s, border-color 0.15s, background 0.15s; flex-shrink: 0; position: relative; }
+  .filter-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .filter-btn.active { color: #2196f3; border-color: #2196f3; background: rgba(33,150,243,0.08); }
+  .filter-btn.active::after { content: ""; position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; background: #e53935; border-radius: 50%; border: 1.5px solid var(--bg); }
+  .filter-wrap { position: relative; margin-left: auto; }
+  .filter-dropdown { position: absolute; right: 0; top: calc(100% + 6px); background: var(--bg-modal); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px; display: none; flex-direction: column; gap: 4px; z-index: 50; min-width: 140px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .filter-dropdown.open { display: flex; }
+  .filter-option { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 13px; color: var(--text-primary); user-select: none; }
+  .filter-option:hover { background: var(--bg-hover); }
+  .filter-option input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #2196f3; flex-shrink: 0; }
+  .filter-count { margin-left: auto; font-size: 11px; color: var(--text-muted); background: var(--bg-hover); border-radius: 10px; padding: 1px 6px; min-width: 20px; text-align: center; }
+  .filter-option.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .filter-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .filter-reset-btn { width: 100%; margin-top: 6px; padding: 5px 0; font-size: 12px; font-family: inherit; background: none; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text-muted); cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+  .filter-reset-btn:hover { color: #e53935; border-color: #e53935; }
+  .sort-label { font-size: 12px; color: var(--text-secondary); }
+  .sort-btn { height: 28px; padding: 0 10px; font-size: 12px; font-family: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--btn-text); }
+  .sort-btn:hover { background: var(--bg-hover); }
+  .sort-btn.active { background: #2196f3; color: #fff; border-color: #2196f3; }
+  .sort-icon { display: none; }
+  .sort-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .drag-handle { display: flex; align-items: center; color: var(--text-muted); cursor: grab; opacity: 0; transition: opacity 0.15s; font-size: 14px; padding: 0 4px 0 0; flex-shrink: 0; user-select: none; line-height: 1; letter-spacing: -1px; }
+  .risk-item:hover .drag-handle { opacity: 1; }
+  .single-item .drag-handle { display: none; }
+  .no-drag .drag-handle { display: none; }
+  .risk-item.dragging { opacity: 0.4; background: var(--bg-hover); }
+  .risk-item.drag-over-top { border-top: 2px solid #2196f3; }
+  .risk-item.drag-over-bottom { border-bottom: 2px solid #2196f3; }
+  /* Tags */
+  .tag-input-wrap { position: relative; }
+  .tag-text-input { width: 100%; height: 30px; font-size: 14px; border-radius: 8px; border: 1.5px solid var(--border); outline: none; padding: 0 8px; background: var(--bg-input); color: var(--text-primary); font-family: inherit; box-sizing: border-box; }
+  .tag-text-input:focus { border: 1.5px solid #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .tag-text-input.error { border: 1.5px solid #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,0.15); }
+  .tag-pills-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; min-height: 0; }
+  .tag-pill { display: inline-flex; align-items: center; gap: 4px; background: #e3f2fd; color: #1565c0; border-radius: 20px; padding: 2px 8px 2px 10px; font-size: 12px; white-space: nowrap; }
+  .dark-early .tag-pill, :root.dark .tag-pill { background: #1e3a5f; color: #90caf9; }
+  .tag-pill-x { cursor: pointer; font-size: 14px; line-height: 1; opacity: 0.6; }
+  .tag-pill-x:hover { opacity: 1; }
+  .tag-autocomplete { position: absolute; top: calc(100% + 3px); left: 0; right: 0; background: var(--bg-modal); border: 1.5px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 200; max-height: 160px; overflow-y: auto; }
+  .tag-autocomplete-item { padding: 8px 12px; font-size: 13px; cursor: pointer; color: var(--text-primary); background: var(--bg-modal); }
+  .tag-autocomplete-item:first-child { border-radius: 6px 6px 0 0; }
+  .tag-autocomplete-item:last-child { border-radius: 0 0 6px 6px; }
+  .tag-autocomplete-item:hover, .tag-autocomplete-item.active { background: var(--bg-hover); }
+  .risk-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .risk-tag-pill { display: inline-flex; align-items: center; background: #e3f2fd; color: #1565c0; border-radius: 20px; padding: 1px 8px; font-size: 11px; white-space: nowrap; }
+  .dark-early .risk-tag-pill, :root.dark .risk-tag-pill { background: #1e3a5f; color: #90caf9; }
+  /* Tag filter */
+  .tag-filter-wrap { position: relative; margin-top: 2px; }
+  .tag-filter-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; height: 30px; font-size: 12px; font-family: inherit; background: var(--btn-bg); color: var(--btn-text); border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; gap: 6px; }
+  .tag-filter-btn:hover { background: var(--bg-hover); }
+  .tag-filter-btn.active { border-color: #2196f3; color: #2196f3; }
+  .tag-filter-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg-modal); border: 1.5px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 300; padding: 4px; display: flex; flex-direction: column; gap: 1px; max-height: 200px; overflow-y: auto; }
+  .tag-filter-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--text-primary); transition: background 0.12s; user-select: none; }
+  .tag-filter-item:hover { background: var(--bg-hover); }
+  .tag-filter-item input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; accent-color: #2196f3; flex-shrink: 0; }
+  .tag-filter-empty { font-size: 12px; color: var(--text-muted); padding: 6px 8px; }
+  .tag-filter-active { display: none; }
+  .risk-item { background: var(--bg-secondary); border: 0.5px solid var(--border-light); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; transition: background 0.15s, border-color 0.15s; }
+  .risk-item:hover { background: var(--bg-hover); border-color: var(--border); }
+  .risk-badge { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .risk-item-meta { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .risk-del { font-size: 17px; color: var(--text-muted); cursor: pointer; line-height: 1; transition: transform 0.15s ease, color 0.15s; display: flex; align-items: center; align-self: center; flex-shrink: 0; }
+  .risk-del:hover { color: #e53935; transform: scale(1.2); }
+  .risk-archive { font-size: 14px; color: var(--text-muted); cursor: pointer; line-height: 1; transition: transform 0.15s ease, color 0.15s; display: flex; align-items: center; align-self: center; flex-shrink: 0; }
+  .risk-archive:hover { color: #2196f3; transform: scale(1.2); }
+  .risk-restore { font-size: 18px; color: var(--text-muted); cursor: pointer; line-height: 1; transition: transform 0.15s ease, color 0.15s; display: flex; align-items: center; align-self: center; flex-shrink: 0; }
+  .risk-restore:hover { color: #4caf50; transform: scale(1.2); }
+  .section-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .risk-item-name { flex: 1; font-size: 14px; cursor: pointer; color: var(--text-primary); }
+  .risk-item-name:hover { text-decoration: underline; color: #2196f3; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg-modal); border-radius: 8px; padding: 24px; width: 100%; max-width: 360px; }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .modal-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 0; }
+  .modal-close { width: 28px; height: 28px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; transition: transform 0.15s ease, background 0.15s, color 0.15s; }
+  .modal-close:hover { background: var(--bg-hover); color: var(--text-secondary); transform: scale(1.15); }
+  .modal label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; margin-top: 12px; }
+  .modal label:first-of-type { margin-top: 0; }
+  .modal input[type=text] { width: 100%; height: 30px; font-size: 14px; border-radius: 8px; border: 1.5px solid var(--border); outline: none; padding: 0 8px; background: var(--bg-input); color: var(--text-primary); }
+  .modal input[type=text]:focus { border: 1.5px solid #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .modal input[type=text].error { border: 1.5px solid #e53935; box-shadow: 0 0 0 3px rgba(229,57,53,0.15); }
+  .modal-error-msg { font-size: 11px; color: #e53935; margin-top: 4px; display: none; }
+  .modal-error-msg.visible { display: block; }
+  .modal select { width: 100%; height: 30px; font-size: 14px; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); outline: none; padding: 0 8px; background-color: var(--bg-input); color: var(--text-primary); -webkit-appearance: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+  .modal select:focus { border: 1.5px solid #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .modal-btns { display: flex; gap: 8px; margin-top: 20px; }
+  .modal-save { flex: 1; height: 38px; font-size: 14px; cursor: pointer; background: #2196f3; color: #fff; border: none; border-radius: 8px; font-family: inherit; }
+  .modal-save:hover { background: #1976d2; }
+  .modal-cancel { flex: 1; height: 38px; font-size: 14px; cursor: pointer; background: var(--btn-bg); color: var(--btn-text); border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; }
+  .modal-cancel:hover { background: var(--cancel-hover); }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tool-btn { height: 34px; padding: 0 14px; font-size: 13px; font-family: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--btn-text); display: flex; align-items: center; gap: 6px; }
+  .tool-btn:hover { background: var(--bg-hover); border-color: var(--border-hover, var(--border)); }
+  .tool-btn.danger { border-color: #e53935; color: #e53935; }
+  .tool-btn.danger:hover { background: var(--danger-hover); }
+  .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .filter-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .filter-btn:disabled.active { background: var(--btn-bg); color: var(--text-muted); border-color: var(--border); }
+  .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
+  .confirm-overlay.open { display: flex; }
+  .confirm-modal { background: var(--bg-modal); border-radius: 8px; padding: 28px 24px 20px; width: 100%; max-width: 320px; text-align: center; position: relative; }
+  .confirm-icon { font-size: 32px; margin-bottom: 12px; }
+  .confirm-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
+  .confirm-text { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+  .confirm-btns { display: flex; gap: 8px; }
+  .confirm-cancel { flex: 1; height: 38px; font-size: 14px; cursor: pointer; background: var(--btn-bg); color: var(--btn-text); border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; }
+  .confirm-cancel:hover { background: var(--cancel-hover); }
+  .confirm-ok { flex: 1; height: 38px; font-size: 14px; cursor: pointer; background: #e53935; color: #fff; border: none; border-radius: 8px; font-family: inherit; }
+  .confirm-ok:hover { background: #c62828; }
+
+  .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
+  .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .import-error { font-size: 12px; color: #e53935; margin-top: 10px; margin-bottom: 10px; display: none; padding: 6px 10px; background: #fff5f5; border-radius: 8px; border: 1px solid #f5c6c6; }
+  .import-error.visible { display: block; }
+  body.dark .import-error { background: #2d1f1f; border-color: #7a2020; }
+
+
+  /* ── Адаптивы ── */
+
+  /* Планшет */
+  @media (max-width: 768px) {
+    .left-axis { display: none; }
+    .bottom-axis-label { display: none; }
+    .bottom-row { display: none; }
+    .legend { margin-left: 0; justify-content: center; }
+    body { padding: 12px; }
+    .grid-section { gap: 16px; }
+    .matrix-container { flex-basis: 100%; min-width: 0; }
+    .sidebar { flex-basis: 100%; min-width: 0; }
+    .toolbar { gap: 6px; }
+    .tool-btn { font-size: 12px; padding: 0 10px; height: 32px; }
+    .scroll-top { left: 12px; bottom: 56px; }
+  }
+
+  /* Кнопки из значков на небольших экранах */
+  @media (max-width: 1472px) {
+    .btn-text { display: none; }
+    .sort-icon { display: inline; }
+    .tool-btn { padding: 0 10px; gap: 0; }
+    .sort-btn { padding: 0 10px; }
+    .toolbar { flex-wrap: nowrap; }
+    .sort-bar { flex-wrap: nowrap; }
+  }
+
+  /* Мобилка */
+  @media (max-width: 480px) {
+    body { padding: 8px; }
+    .grid-section { gap: 12px; }
+    .toolbar { gap: 4px; }
+    .tool-btn { font-size: 11px; padding: 0 8px; height: 30px; gap: 4px; }
+    .sort-btn { font-size: 11px; padding: 0 8px; height: 26px; }
+    .risk-form { padding: 10px; }
+    .section-title { font-size: 14px; }
+    .risk-item-name { font-size: 13px; }
+    .risk-item-meta { font-size: 10px; }
+    .scroll-top { left: 8px; bottom: 52px; width: 32px; height: 32px; font-size: 14px; }
+    .legend-item { font-size: 13px; }
+    .bottom-axis-label { font-size: 12px; }
+    .left-axis-label { font-size: 12px; }
+  }
+
+  /* Custom select */
+  .custom-select { position: relative; width: 100%; }
+  .custom-select-btn { width: 100%; height: 30px; font-size: 14px; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg-input); color: var(--text-primary); padding: 0 32px 0 8px; display: flex; align-items: center; text-align: left; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; position: relative; }
+  .custom-select-btn:focus { outline: none; border-color: #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .custom-select-btn.open { border-color: #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .custom-select-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); transition: transform 0.15s; }
+  .custom-select-btn.open .custom-select-arrow { transform: translateY(-50%) rotate(180deg); }
+  .custom-select-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg-modal); border: 1.5px solid var(--border); border-radius: 8px; padding: 4px; z-index: 60; display: none; flex-direction: column; gap: 1px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .custom-select-list.open { display: flex; }
+  .custom-select-option { padding: 7px 10px; border-radius: 6px; font-size: 14px; color: var(--text-primary); cursor: pointer; font-family: inherit; transition: background 0.1s; }
+  .custom-select-option:hover { background: var(--bg-hover); }
+  .custom-select-option.selected { color: #2196f3; font-weight: 500; }
+  .custom-select-option { display: flex; align-items: center; justify-content: space-between; }
+  .cs-percent { font-size: 11px; color: var(--text-muted); margin-left: 8px; flex-shrink: 0; }
+  .custom-select-option.selected .cs-percent { color: rgba(33,150,243,0.7); }
+
+  /* Footer */
+  .footer { margin-top: 36px; padding: 12px 0; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+  .footer a { color: var(--text-muted); text-decoration: none; }
+  .footer a:hover { color: var(--text-secondary); text-decoration: underline; }
+  .footer-dot { opacity: 0.4; }
+
+  /* Archive tabs */
+  .list-tabs { display: flex; gap: 4px; margin-top: 10px; margin-bottom: 12px; background: var(--bg-secondary); border-radius: 8px; padding: 3px; }
+  .list-tab { flex: 1; height: 30px; font-size: 13px; font-family: inherit; cursor: pointer; border-radius: 6px; border: none; background: transparent; color: var(--text-secondary); transition: background 0.15s, color 0.15s; }
+  .list-tab:hover { color: var(--text-primary); }
+  .list-tab.active { background: var(--bg-modal); color: var(--text-primary); font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  .archive-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--border); color: var(--text-secondary); border-radius: 10px; font-size: 10px; padding: 1px 5px; margin-left: 4px; min-width: 16px; }
+  .list-tab.active .archive-badge { background: var(--border-light); color: var(--text-primary); }
+  body.dark .list-tab.active { background: #2d2d2d; }
+  body.dark .list-tabs { background: #1a1a1a; }
+</style>
+
+<button class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Наверх">↑</button>
+
+<div id="edit-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Редактировать риск</div>
+      <button class="modal-close" onclick="closeModal()" title="Закрыть">✕</button>
+    </div>
+    <label>Название <span style="color:#e53935">*</span></label>
+    <input type="text" id="modal-name" maxlength="80" />
+    <div class="modal-error-msg" id="modal-name-error">Нужно заполнить обязательное поле</div>
+    <label>Вероятность (1–4)</label>
+    <div class="custom-select" id="cs-modal-prob">
+      <button type="button" class="custom-select-btn" onclick="toggleCustomSelect('cs-modal-prob')">
+        <span class="cs-value">1 — Маловероятно</span>
+        <svg class="custom-select-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="custom-select-list">
+        <div class="custom-select-option selected" data-value="1" onclick="selectOption('cs-modal-prob',1)">1 — Маловероятно<span class="cs-percent">0–10%</span></div>
+        <div class="custom-select-option" data-value="2" onclick="selectOption('cs-modal-prob',2)">2 — Иногда<span class="cs-percent">10–30%</span></div>
+        <div class="custom-select-option" data-value="3" onclick="selectOption('cs-modal-prob',3)">3 — Часто<span class="cs-percent">30–70%</span></div>
+        <div class="custom-select-option" data-value="4" onclick="selectOption('cs-modal-prob',4)">4 — Почти наверняка<span class="cs-percent">70–100%</span></div>
+      </div>
+    </div>
+    <label>Влияние (1–4)</label>
+    <div class="custom-select" id="cs-modal-sev">
+      <button type="button" class="custom-select-btn" onclick="toggleCustomSelect('cs-modal-sev')">
+        <span class="cs-value">1 — Незначительное</span>
+        <svg class="custom-select-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="custom-select-list">
+        <div class="custom-select-option selected" data-value="1" onclick="selectOption('cs-modal-sev',1)">1 — Незначительное</div>
+        <div class="custom-select-option" data-value="2" onclick="selectOption('cs-modal-sev',2)">2 — Умеренное</div>
+        <div class="custom-select-option" data-value="3" onclick="selectOption('cs-modal-sev',3)">3 — Серьёзное</div>
+        <div class="custom-select-option" data-value="4" onclick="selectOption('cs-modal-sev',4)">4 — Критическое</div>
+      </div>
+    </div>
+    <label>Теги <span style="font-size:11px;color:var(--text-muted);font-weight:400">— через запятую или enter</span></label>
+    <div class="tag-input-wrap" id="modal-tag-wrap">
+      <input type="text" class="tag-text-input" id="modal-tag-input" placeholder="Например: модуль оплаты" autocomplete="off" />
+      <div class="tag-autocomplete" id="modal-tag-autocomplete" style="display:none"></div>
+    </div>
+    <div class="tag-pills-row" id="modal-tag-pills-row"></div>
+    <div class="modal-error-msg" id="modal-tag-error"></div>
+    <div id="modal-created" style="font-size:11px;color:var(--text-muted);margin-top:12px;"></div>
+    <div class="modal-btns">
+      <button class="modal-save" onclick="saveEdit()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="grid-section">
+
+    <div class="matrix-container">
+      <!-- Matrix layout: left axis + grid area -->
+      <div class="matrix-layout">
+
+        <!-- Left axis: label + numbers -->
+        <div class="left-axis">
+          <div class="left-axis-label">(Y) Влияние →</div>
+          <div class="left-nums-col" id="left-nums-col"></div>
+        </div>
+
+        <!-- Grid + bottom axis -->
+        <div class="matrix-right">
+          <div class="matrix-grid" id="matrix-grid"></div>
+          <div class="bottom-row" id="bottom-nums"></div>
+          <div class="bottom-axis-row">
+            <div class="bottom-axis-label">(X) Вероятность →</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="legend">
+        <div class="legend-item"><div class="legend-box" style="background:#4caf50"></div> Низкий</div>
+        <div class="legend-item"><div class="legend-box" style="background:#f9a825"></div> Средний</div>
+        <div class="legend-item"><div class="legend-box" style="background:#e65100"></div> Высокий</div>
+        <div class="legend-item"><div class="legend-box" style="background:#b71c1c"></div> Критический</div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="risk-form">
+        <div class="form-header">
+          <div class="section-title">Добавить риск</div>
+          <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
+        </div>
+        <label>Название <span style="color:#e53935">*</span></label>
+        <input type="text" id="risk-name" placeholder="Например: неверно считается итоговая сумма корзины" maxlength="80" />
+        <div class="error-msg" id="risk-name-error">Нужно заполнить обязательное поле</div>
+        <label>Вероятность (1–4)</label>
+        <div class="custom-select" id="cs-risk-prob">
+          <button type="button" class="custom-select-btn" onclick="toggleCustomSelect('cs-risk-prob')">
+            <span class="cs-value">1 — Маловероятно</span>
+            <svg class="custom-select-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="custom-select-list">
+            <div class="custom-select-option selected" data-value="1" onclick="selectOption('cs-risk-prob',1)">1 — Маловероятно<span class="cs-percent">0–10%</span></div>
+            <div class="custom-select-option" data-value="2" onclick="selectOption('cs-risk-prob',2)">2 — Иногда<span class="cs-percent">10–30%</span></div>
+            <div class="custom-select-option" data-value="3" onclick="selectOption('cs-risk-prob',3)">3 — Часто<span class="cs-percent">30–70%</span></div>
+            <div class="custom-select-option" data-value="4" onclick="selectOption('cs-risk-prob',4)">4 — Почти наверняка<span class="cs-percent">70–100%</span></div>
+          </div>
+        </div>
+        <label>Влияние (1–4)</label>
+        <div class="custom-select" id="cs-risk-sev">
+          <button type="button" class="custom-select-btn" onclick="toggleCustomSelect('cs-risk-sev')">
+            <span class="cs-value">1 — Незначительное</span>
+            <svg class="custom-select-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <div class="custom-select-list">
+            <div class="custom-select-option selected" data-value="1" onclick="selectOption('cs-risk-sev',1)">1 — Незначительное</div>
+            <div class="custom-select-option" data-value="2" onclick="selectOption('cs-risk-sev',2)">2 — Умеренное</div>
+            <div class="custom-select-option" data-value="3" onclick="selectOption('cs-risk-sev',3)">3 — Серьёзное</div>
+            <div class="custom-select-option" data-value="4" onclick="selectOption('cs-risk-sev',4)">4 — Критическое</div>
+          </div>
+        </div>
+        <label>Теги <span style="font-size:11px;color:var(--text-muted);font-weight:400">— через запятую или enter</span></label>
+        <div class="tag-input-wrap" id="tag-input-wrap">
+          <input type="text" class="tag-text-input" id="tag-text-input" placeholder="Например: модуль оплаты" autocomplete="off" />
+          <div class="tag-autocomplete" id="tag-autocomplete" style="display:none"></div>
+        </div>
+        <div class="tag-pills-row" id="tag-pills-row"></div>
+        <div class="modal-error-msg" id="tag-error"></div>
+        <button class="add-btn" onclick="addRisk()">Добавить</button>
+      </div>
+      <div class="toolbar">
+        <button class="tool-btn" id="btn-export-xlsx" onclick="exportXLSX()" title="Скачать риски как Excel-файл">⬇ <span class="btn-text">Экспорт Excel</span></button>
+        <label class="tool-btn" id="btn-import-xlsx" title="Загрузить риски из Excel-файла">⬆ <span class="btn-text">Импорт Excel</span><input type="file" accept=".xlsx" onchange="importXLSX(event)" style="display:none"></label>
+
+        <button class="tool-btn" onclick="exportPNG()" title="Скачать матрицу как картинку">🖼 <span class="btn-text">Экспорт PNG</span></button>
+        <button class="tool-btn" onclick="exportHTML()" title="Скачать HTML-файл с текущими рисками">📄 <span class="btn-text">Поделиться</span></button>
+        <button class="tool-btn danger" onclick="clearAll()" title="Очистить все риски">✕ <span class="btn-text">Очистить</span></button>
+      </div>
+      <div class="import-error" id="import-error"></div>
+      <div class="list-tabs">
+        <button class="list-tab active" id="tab-active" onclick="switchTab('active')">Активные <span class="archive-badge" id="tab-active-count">0</span></button>
+        <button class="list-tab" id="tab-archive" onclick="switchTab('archive')">Архив <span class="archive-badge" id="tab-archive-count">0</span></button>
+      </div>
+      <div class="section-title" style="margin-bottom:10px;">Список рисков:</div>
+      <div class="sort-bar">
+        <span class="sort-label">Сортировка:</span>
+        <button class="sort-btn active" id="sort-default" onclick="setSort('default')"><span class="sort-icon">≡</span><span class="btn-text"> По умолчанию</span></button>
+        <button class="sort-btn" id="sort-desc" onclick="setSort('desc')"><span class="sort-icon">↓</span><span class="btn-text"> По убыванию</span></button>
+        <button class="sort-btn" id="sort-asc" onclick="setSort('asc')"><span class="sort-icon">↑</span><span class="btn-text"> По возрастанию</span></button>
+        <div class="filter-wrap">
+          <button class="filter-btn" id="filter-btn" onclick="toggleFilter()" title="Фильтр по уровню риска">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 2.5h12M3 7h8M5.5 11.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="filter-dropdown" id="filter-dropdown">
+            <label class="filter-option" id="fo-crit">
+              <input type="checkbox" id="filter-crit" onchange="applyFilter()">
+              <div class="filter-dot" style="background:#b71c1c"></div>
+              Критический
+              <span class="filter-count" id="fc-crit">0</span>
+            </label>
+            <label class="filter-option" id="fo-high">
+              <input type="checkbox" id="filter-high" onchange="applyFilter()">
+              <div class="filter-dot" style="background:#e65100"></div>
+              Высокий
+              <span class="filter-count" id="fc-high">0</span>
+            </label>
+            <label class="filter-option" id="fo-mid">
+              <input type="checkbox" id="filter-mid" onchange="applyFilter()">
+              <div class="filter-dot" style="background:#f9a825"></div>
+              Средний
+              <span class="filter-count" id="fc-mid">0</span>
+            </label>
+            <label class="filter-option" id="fo-low">
+              <input type="checkbox" id="filter-low" onchange="applyFilter()">
+              <div class="filter-dot" style="background:#4caf50"></div>
+              Низкий
+              <span class="filter-count" id="fc-low">0</span>
+            </label>
+            <div style="border-top:1px solid var(--border);margin:6px 0 4px;"></div>
+            <div class="tag-filter-wrap">
+              <button type="button" class="tag-filter-btn" id="tag-filter-btn" onclick="toggleTagDropdown()">
+                <span id="tag-filter-label">По тегу</span>
+                <svg class="custom-select-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+              <div class="tag-filter-dropdown" id="tag-filter-dropdown" style="display:none"></div>
+            </div>
+            <button class="filter-reset-btn" id="filter-reset-btn" onclick="resetAllFilters()" style="display:none">Сбросить всё</button>
+          </div>
+        </div>
+      </div>
+      <div class="risk-list" id="risk-list"></div>
+    </div>
+
+  </div>
+  <div class="footer">
+    <span>© 2026 Bondarenko <span class="footer-dot">·</span> <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a> <span class="footer-dot">·</span> v1.0.0</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="https://avbondarenko.yonote.ru/share/risk-matrix" target="_blank" rel="noopener" title="Гайд по матрице рисков">FAQ</a>
+      <a href="https://t.me/qa_https" target="_blank" rel="noopener" title="Telegram">Feedback</a>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-modal" class="confirm-overlay">
+  <div class="confirm-modal">
+    <button class="modal-close" onclick="closeConfirm()" title="Закрыть" style="position:absolute;top:12px;right:12px;">✕</button>
+    <div class="confirm-icon">🥺</div>
+    <div class="confirm-title">Точно удалить все риски?</div>
+    <div class="confirm-text">Их нельзя будет восстановить</div>
+    <div class="confirm-btns">
+<button class="confirm-ok" onclick="confirmClear()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<div id="delete-risk-modal" class="confirm-overlay">
+  <div class="confirm-modal">
+    <button class="modal-close" onclick="closeDeleteRisk()" title="Закрыть" style="position:absolute;top:12px;right:12px;">✕</button>
+    <div class="confirm-icon">🤔</div>
+    <div class="confirm-title">Точно удалить этот риск?</div>
+    <div class="confirm-text">Его можно добавить в архив</div>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="confirmArchiveRisk()">В архив</button>
+      <button class="confirm-ok" onclick="confirmDeleteRisk()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<div id="global-tooltip"></div>
+
+<script>
+// Цвет зоны определяется по счету (p * s, максимум 16)
+function zoneInfo(p, s) {
+  const score = p * s;
+  if (score >= 12) {
+    const c = score >= 16 ? '#b71c1c' : score >= 14 ? '#c32222' : '#d02c2c';
+    return { label: 'Критический', color: c, textColor: '#b71c1c' };
+  }
+  if (score >= 9) {
+    const c = score >= 11 ? '#e65100' : score >= 10 ? '#f05a00' : '#f96600';
+    return { label: 'Высокий', color: c, textColor: '#e65100' };
+  }
+  if (score >= 4) {
+    const c = score >= 8 ? '#f9a825' : score >= 6 ? '#fab93d' : score >= 5 ? '#fbc850' : '#fcd46a';
+    return { label: 'Средний', color: c, textColor: '#f9a825' };
+  }
+  const c = score >= 3 ? '#4caf50' : score >= 2 ? '#61bc65' : '#7dca80';
+  return { label: 'Низкий', color: c, textColor: '#4caf50' };
+}
+
+const DOT_COLORS = [
+  '#E53935', '#8E24AA', '#1E88E5', '#00897B',
+  '#F4511E', '#6D4C41', '#039BE5', '#43A047',
+  '#FFB300', '#D81B60', '#3949AB', '#00ACC1',
+  '#7CB342', '#FB8C00', '#5E35B1', '#00BFA5',
+  '#F06292', '#4DB6AC', '#FFD54F', '#80DEEA',
+];
+
+const LS_KEY = 'risk_matrix_risks';
+const LS_ARCHIVE_KEY = 'risk_matrix_archive';
+let currentTab = 'active';
+let archiveSort = 'default';
+let archiveFilters = new Set(); // пустой = показать всё
+let archiveTagFilters = new Set();
+
+const DEFAULT_RISKS_TS = Date.now();
+const DEFAULT_RISKS = [
+  { id:1, name:'Товары не сохраняются в избранное',              prob:2, sev:2, createdAt: DEFAULT_RISKS_TS, tags:['каталог'] },
+  { id:2, name:'Форма регистрации возвращает ошибку',            prob:3, sev:3, createdAt: DEFAULT_RISKS_TS, tags:['авторизация'] },
+  { id:3, name:'Загруженная аватарка не сохраняется в профиле',  prob:1, sev:1, createdAt: DEFAULT_RISKS_TS, tags:['профиль'] },
+  { id:4, name:'Платёжный шлюз не обрабатывает транзакцию',      prob:4, sev:4, createdAt: DEFAULT_RISKS_TS, tags:['оплата'] },
+  { id:5, name:'Поиск возвращает нерелевантные товары',          prob:3, sev:3, createdAt: DEFAULT_RISKS_TS, tags:['поиск'] },
+  { id:6, name:'Страница сравнения выводит не все характеристики', prob:3, sev:2, createdAt: DEFAULT_RISKS_TS, tags:['каталог'] },
+  { id:7, name:'Ревью нового разработчика займёт больше времени', prob:3, sev:2, createdAt: DEFAULT_RISKS_TS, tags:['команда'] },
+  { id:8, name:'Ключевой разработчик ушёл на больничный',        prob:2, sev:3, createdAt: DEFAULT_RISKS_TS, tags:['команда'] },
+];
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.risks && Array.isArray(parsed.risks) && parsed.risks.length > 0) {
+        return { risks: parsed.risks, nextId: parsed.nextId || parsed.risks.length + 1 };
+      }
+    }
+  } catch(e) {}
+  return { risks: DEFAULT_RISKS.map(r => ({...r})), nextId: Math.max(...DEFAULT_RISKS.map(r => r.id)) + 1 };
+}
+
+let { risks, nextId } = loadFromStorage();
+const DEFAULT_ARCHIVE = [];
+
+let archivedRisks = (function() {
+  try {
+    const saved = localStorage.getItem(LS_ARCHIVE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch(e) {}
+  return DEFAULT_ARCHIVE.map(r => ({...r}));
+})();
+
+function saveToStorage() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ risks, nextId })); } catch(e) {}
+}
+
+function saveArchive() {
+  try { localStorage.setItem(LS_ARCHIVE_KEY, JSON.stringify(archivedRisks)); } catch(e) {}
+}
+
+function dotColorById(id) { return DOT_COLORS[(id - 1) % DOT_COLORS.length]; }
+
+function escapeHTML(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showImportError(msg) {
+  const el = document.getElementById('import-error');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 4000);
+}
+
+function spiralPositions(n, r) {
+  if (n === 0) return [];
+  if (n === 1) return [{ x: 0, y: 0 }];
+  const positions = [{ x: 0, y: 0 }];
+  let ring = 1;
+  while (positions.length < n) {
+    const count = Math.min(6 * ring, n - positions.length);
+    for (let i = 0; i < count; i++) {
+      const angle = (2 * Math.PI * i) / (6 * ring);
+      positions.push({
+        x: Math.round(ring * r * Math.cos(angle - Math.PI / 2)),
+        y: Math.round(ring * r * Math.sin(angle - Math.PI / 2))
+      });
+    }
+    ring++;
+  }
+  return positions;
+}
+
+function formatDate(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function buildGrid() {
+  const grid = document.getElementById('matrix-grid');
+
+  // Вычислите размер ячейки из контейнера сетки ДО очистки — это позволит избежать переформатирования
+  const gridW = grid.getBoundingClientRect().width || grid.offsetWidth || 300;
+  const gap = parseFloat(getComputedStyle(grid).gap) || 2;
+  const cellSize = (gridW - gap * 3) / 4;
+  const maxRadius = cellSize * 0.44;
+
+  // Вычислите размер ячейки из контейнера сетки ДО очистки — позволит избежать переформатирования
+  const fragment = document.createDocumentFragment();
+
+  for (let s = 4; s >= 1; s--) {
+    for (let p = 1; p <= 4; p++) {
+      const { color, alpha } = zoneInfo(p, s);
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.background = color;
+
+      const cellRisks = risks.filter(r => r.prob === p && r.sev === s);
+      const cellScore = p * s;
+      const { label: cellLabel } = zoneInfo(p, s);
+      cell.addEventListener('mouseenter', (e) => {
+        const t = document.getElementById('global-tooltip');
+        const riskWord = cellRisks.length === 1 ? 'риск' : cellRisks.length >= 2 && cellRisks.length <= 4 ? 'риска' : 'рисков';
+        const risksText = cellRisks.length > 0 ? `${cellRisks.length} ${riskWord}` : 'Нет рисков';
+        t.innerHTML = `<span style="font-weight:600">Score ${cellScore}</span> · ${cellLabel}<br><span style="color:var(--text-muted);font-size:11px">${risksText}</span>`;
+        t.style.display = 'block';
+        const rect = cell.getBoundingClientRect();
+        const tw = t.offsetWidth;
+        const th = t.offsetHeight;
+        const margin = 8;
+        let left = rect.left + rect.width / 2 - tw / 2;
+        let top = rect.top - th - margin;
+        if (left < margin) left = margin;
+        if (left + tw > window.innerWidth - margin) left = window.innerWidth - tw - margin;
+        if (top < margin) top = rect.bottom + margin;
+        t.style.left = left + 'px';
+        t.style.top = top + 'px';
+      });
+      cell.addEventListener('mouseleave', () => {
+        document.getElementById('global-tooltip').style.display = 'none';
+      });
+      const n = cellRisks.length;
+
+      let dotSize, spacing;
+      if (n <= 1) {
+        dotSize = Math.min(22, cellSize * 0.34);
+        spacing = 0;
+      } else {
+        const rings = n <= 7 ? 1 : n <= 19 ? 2 : 3;
+        const maxSpacing = maxRadius / rings;
+        dotSize = Math.min(20, Math.max(8, maxSpacing * 0.82));
+        spacing = Math.min(maxSpacing, dotSize + 1);
+      }
+
+      const positions = spiralPositions(n, spacing);
+
+      cellRisks.forEach((r, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'cell-dot';
+        dot.dataset.riskId = r.id;
+        dot.style.background = dotColorById(r.id);
+        dot.style.width = dotSize + 'px';
+        dot.style.height = dotSize + 'px';
+        dot.style.fontSize = Math.max(6, dotSize * 0.44) + 'px';
+        dot.style.left = '50%';
+        dot.style.top = '50%';
+        dot.style.transform = `translate(calc(-50% + ${positions[i].x}px), calc(-50% + ${positions[i].y}px))`;
+        dot.textContent = risks.indexOf(r) + 1;
+        dot.addEventListener('mouseenter', () => {
+          const t = document.getElementById('global-tooltip');
+          t.textContent = r.name;
+          t.style.display = 'block';
+          const rect = dot.getBoundingClientRect();
+          const tw = t.offsetWidth;
+          const th = t.offsetHeight;
+          const margin = 8;
+          let left = rect.left + rect.width / 2 - tw / 2;
+          let top = rect.top - th - margin;
+          if (left < margin) left = margin;
+          if (left + tw > window.innerWidth - margin) left = window.innerWidth - tw - margin;
+          if (top < margin) top = rect.bottom + margin;
+          t.style.left = left + 'px';
+          t.style.top = top + 'px';
+        });
+        dot.addEventListener('mouseleave', () => {
+          document.getElementById('global-tooltip').style.display = 'none';
+        });
+        dot.addEventListener('click', () => {
+          document.getElementById('global-tooltip').style.display = 'none';
+          openModal(r.id);
+        });
+        cell.appendChild(dot);
+      });
+
+      fragment.appendChild(cell);
+    }
+  }
+
+  // Однократное обновление DOM — без перерисовки во время построения структуры
+  grid.innerHTML = '';
+  grid.appendChild(fragment);
+  requestAnimationFrame(() => syncLeftAxis());
+}
+
+function buildLeftAxis() {
+  const col = document.getElementById('left-nums-col');
+  col.innerHTML = '';
+  for (let s = 4; s >= 1; s--) {
+    const d = document.createElement('div');
+    d.className = 'left-num';
+    d.textContent = s;
+    col.appendChild(d);
+  }
+}
+
+function syncLeftAxis() {
+  const grid = document.getElementById('matrix-grid');
+  const col = document.getElementById('left-nums-col');
+  if (!grid || !col) return;
+  // Точно выровняйте высоту сетки, чтобы дочерние элементы flex пропорционально заполняли строки
+  const h = grid.getBoundingClientRect().height;
+  if (h > 0) col.style.height = h + 'px';
+}
+
+function buildBottomAxis() {
+  const row = document.getElementById('bottom-nums');
+  row.innerHTML = '';
+  for (let p = 1; p <= 4; p++) {
+    const d = document.createElement('div');
+    d.className = 'bottom-num';
+    d.textContent = p;
+    row.appendChild(d);
+  }
+}
+
+let editingId = null;
+
+function openModal(id) {
+  const r = risks.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('modal-name').value = r.name;
+  const createdEl = document.getElementById('modal-created');
+  if (createdEl) createdEl.textContent = r.createdAt ? 'Добавлен: ' + formatDate(r.createdAt) : '';
+  setCustomSelectValue('cs-modal-prob', r.prob);
+  setCustomSelectValue('cs-modal-sev', r.sev);
+  initModalTagInput(r.tags || []);
+  document.getElementById('modal-name').classList.remove('error');
+  document.getElementById('modal-name-error').classList.remove('visible');
+  document.getElementById('edit-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('modal-name').focus(), 50);
+}
+
+function closeModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
+  document.body.style.overflow = '';
+}
+
+function saveEdit() {
+  const nameInput = document.getElementById('modal-name');
+  const errorMsg = document.getElementById('modal-name-error');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameInput.classList.add('error');
+    errorMsg.classList.add('visible');
+    nameInput.focus();
+    return;
+  }
+  const r = risks.find(x => x.id === editingId);
+  if (r) {
+    r.name = name;
+    r.prob = getCustomSelectValue('cs-modal-prob');
+    r.sev  = getCustomSelectValue('cs-modal-sev');
+    r.tags = [...modalTags];
+    // createdAt stays unchanged
+  }
+  closeModal();
+  saveToStorage();
+  render();
+}
+
+function updateFilterCounts() {
+  const source = currentTab === 'archive' ? archivedRisks : risks;
+  const filters = currentTab === 'archive' ? archiveFilters : activeFilters;
+  const tagFilters = getCurrentTagFilters();
+
+  const counts = { crit: 0, high: 0, mid: 0, low: 0 };
+  source.forEach(r => {
+    // If tag filters are active, only count risks matching those tags
+    if (tagFilters.size > 0) {
+      const rTags = r.tags || [];
+      const matchesNoTag = tagFilters.has('__no_tag__') && rTags.length === 0;
+      const matchesTag = [...tagFilters].some(t => t !== '__no_tag__' && rTags.includes(t));
+      if (!matchesNoTag && !matchesTag) return;
+    }
+    const score = r.prob * r.sev;
+    if (score >= 12) counts.crit++;
+    else if (score >= 9) counts.high++;
+    else if (score >= 4) counts.mid++;
+    else counts.low++;
+  });
+  ['crit','high','mid','low'].forEach(id => {
+    const countEl = document.getElementById('fc-' + id);
+    const optEl = document.getElementById('fo-' + id);
+    const cb = document.getElementById('filter-' + id);
+    if (countEl) countEl.textContent = counts[id];
+    if (optEl && cb) {
+      if (counts[id] === 0) {
+        optEl.classList.add('disabled');
+        cb.checked = false;
+      } else {
+        optEl.classList.remove('disabled');
+        cb.checked = filters.has(id);
+      }
+    }
+  });
+
+  // Update tag button label, indicator and reset button with fresh state
+  updateTagFilterBtn();
+  updateTagFilterIndicator();
+  updateFilterResetBtn();
+}
+
+function purgeStaleFilters() {
+  // Remove tag filters that no longer have any matching risks in current data
+  const availableTags = getAvailableTagsForLevelFilter();
+  const tagFilters = getCurrentTagFilters();
+  [...tagFilters].forEach(t => { if (!availableTags.includes(t)) tagFilters.delete(t); });
+
+  // Remove level filters that no longer have any matching risks
+  const source = currentTab === 'archive' ? archivedRisks : risks;
+  const levelFilters = currentTab === 'archive' ? archiveFilters : activeFilters;
+  const existingLevels = new Set();
+  source.forEach(r => {
+    const s = r.prob * r.sev;
+    if (s >= 12) existingLevels.add('crit');
+    else if (s >= 9) existingLevels.add('high');
+    else if (s >= 4) existingLevels.add('mid');
+    else existingLevels.add('low');
+  });
+  [...levelFilters].forEach(id => { if (!existingLevels.has(id)) levelFilters.delete(id); });
+
+  // Sync checkboxes to match cleaned state
+  ['crit','high','mid','low'].forEach(id => {
+    const cb = document.getElementById('filter-' + id);
+    if (cb) cb.checked = levelFilters.has(id);
+  });
+}
+
+function buildList() {
+  purgeStaleFilters();
+  const list = document.getElementById('risk-list');
+  list.innerHTML = '';
+  // Update tab counts with X из Y when filtered
+  const filteredActive = getFilteredRisks();
+  const filteredArchive = getFilteredArchive();
+  const activeCount = filteredActive.length === risks.length ? risks.length : filteredActive.length + ' из ' + risks.length;
+  const archiveCount = filteredArchive.length === archivedRisks.length ? archivedRisks.length : filteredArchive.length + ' из ' + archivedRisks.length;
+  document.getElementById('tab-active-count').textContent = activeCount;
+  document.getElementById('tab-archive-count').textContent = archiveCount;
+  // Archive tab
+  if (currentTab === 'archive') {
+    updateFilterCounts();
+    if (!archivedRisks.length) {
+      list.innerHTML = '<div style="font-size:14px;color:var(--text-muted);margin-top:12px;">Архив пока пуст. Может, уже есть что закрыть?</div>';
+    } else {
+      filteredArchive.forEach(r => {
+        const { label, color, textColor } = zoneInfo(r.prob, r.sev);
+        const score = r.prob * r.sev;
+        const item = document.createElement('div');
+        item.className = 'risk-item';
+        item.style.opacity = '0.7';
+        const datesText = [
+          r.createdAt ? 'Добавлен: ' + formatDate(r.createdAt) : '',
+          r.archivedAt ? 'Архив: ' + formatDate(r.archivedAt) : ''
+        ].filter(Boolean).join(' · ');
+        item.innerHTML = `
+          <div class="risk-badge" style="background:${dotColorById(r.id)}"></div>
+          <div style="flex:1;min-width:0;">
+            <span class="risk-item-name" style="cursor:default;pointer-events:none;display:block;">${escapeHTML(r.name)}</span>
+            ${(r.tags && r.tags.length) ? `<div class="risk-tags">${r.tags.map(t => `<span class="risk-tag-pill">#${escapeHTML(t)}</span>`).join('')}</div>` : ''}
+            ${datesText ? `<span style="font-size:11px;color:var(--text-muted);">${datesText}</span>` : ''}
+          </div>
+          <span class="risk-item-meta">X${r.prob}·Y${r.sev}=${score} <span style="color:${textColor};font-weight:500">${label}</span></span>
+          <span class="risk-restore" title="Восстановить">↩</span>
+        `;
+        item.querySelector('.risk-restore').addEventListener('click', (e) => { e.stopPropagation(); restoreRisk(r.id); });
+        list.appendChild(item);
+      });
+    }
+    updateButtons();
+    return;
+  }
+  updateFilterCounts();
+  if (!risks.length) {
+    list.innerHTML = '<div style="font-size:14px;color:var(--text-muted);margin-top:12px;">Список пока пуст. Добавим что-нибудь?</div>';
+    updateButtons();
+    return;
+  }
+  const filtered = getFilteredRisks();
+  const dragEnabled = currentSort === 'default' && activeFilters.size === 0 && activeTagFilters.size === 0;
+  filtered.forEach((r) => {
+    const { label, color, textColor } = zoneInfo(r.prob, r.sev);
+    const score = r.prob * r.sev;
+    const item = document.createElement('div');
+    item.className = 'risk-item';
+    item.addEventListener('mouseenter', () => {
+      const dot = document.querySelector(`.cell-dot[data-risk-id="${r.id}"]`);
+      if (dot) dot.classList.add('highlighted');
+    });
+    item.addEventListener('mouseleave', () => {
+      const dot = document.querySelector(`.cell-dot[data-risk-id="${r.id}"]`);
+      if (dot) dot.classList.remove('highlighted');
+    });
+    item.innerHTML = `
+      <div class="drag-handle" title="Перетащить">⠿</div>
+      <div class="risk-badge" style="background:${dotColorById(r.id)}"></div>
+      <div style="flex:1;min-width:0;">
+        <span class="risk-item-name" title="Нажмите для редактирования">${escapeHTML(r.name)}</span>
+        ${(r.tags && r.tags.length) ? `<div class="risk-tags">${r.tags.map(t => `<span class="risk-tag-pill">#${escapeHTML(t)}</span>`).join('')}</div>` : ''}
+      </div>
+      <span class="risk-item-meta">X${r.prob}·Y${r.sev}=${score} <span style="color:${textColor};font-weight:500">${label}</span></span>
+      <span class="risk-del"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    `;
+    item.querySelector('.risk-item-name').addEventListener('click', () => openModal(r.id));
+    item.querySelector('.risk-del').addEventListener('click', (e) => { e.stopPropagation(); openDeleteRisk(r.id); });
+    // Drag-and-drop
+    const handle = item.querySelector('.drag-handle');
+    handle.addEventListener('mousedown', () => {
+      if (list.classList.contains('no-drag')) return;
+      item.draggable = true;
+    });
+    item.addEventListener('dragstart', (e) => {
+      dragSrcId = r.id;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', r.id);
+    });
+    item.addEventListener('dragend', () => {
+      item.draggable = false;
+      item.classList.remove('dragging');
+      document.querySelectorAll('.risk-item').forEach(el => {
+        el.classList.remove('drag-over-top', 'drag-over-bottom');
+      });
+    });
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (dragSrcId === r.id) return;
+      const rect = item.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      item.classList.toggle('drag-over-top', e.clientY < mid);
+      item.classList.toggle('drag-over-bottom', e.clientY >= mid);
+    });
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over-top', 'drag-over-bottom');
+    });
+    item.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (dragSrcId === r.id) return;
+      const rect = item.getBoundingClientRect();
+      const mid = rect.top + rect.height / 2;
+      const insertBefore = e.clientY < mid;
+      // Reorder in risks array based on current displayed order
+      const displayed = getFilteredRisks();
+      const srcIdx = risks.findIndex(x => x.id === dragSrcId);
+      const tgtIdx = risks.findIndex(x => x.id === r.id);
+      if (srcIdx === -1 || tgtIdx === -1) return;
+      const [moved] = risks.splice(srcIdx, 1);
+      const newTgt = risks.findIndex(x => x.id === r.id);
+      risks.splice(insertBefore ? newTgt : newTgt + 1, 0, moved);
+      // Manual order becomes the new default
+      if (currentSort !== 'default') {
+        currentSort = 'default';
+        ['default','desc','asc'].forEach(m => {
+          document.getElementById('sort-' + m).classList.toggle('active', m === 'default');
+        });
+      }
+      saveToStorage();
+      buildList();
+      buildGrid();
+    });
+    list.appendChild(item);
+  });
+  updateButtons();
+}
+
+let currentSort = 'default';
+let activeFilters = new Set(); // пустой = показать всё
+let dragSrcId = null;
+
+function toggleFilter() {
+  const dd = document.getElementById('filter-dropdown');
+  dd.classList.toggle('open');
+}
+
+function applyFilter() {
+  if (currentTab === 'archive') { applyArchiveFilter(); return; }
+  activeFilters = new Set();
+  ['crit','high','mid','low'].forEach(id => {
+    if (document.getElementById('filter-' + id).checked) activeFilters.add(id);
+  });
+  updateTagDropdownForCurrentFilters();
+  updateFilterResetBtn();
+  updateTagFilterIndicator();
+  buildList();
+}
+
+function getFilteredRisks() {
+  return getSortedRisks().filter(r => {
+    const score = r.prob * r.sev;
+    if (activeFilters.size > 0) {
+      const levelOk =
+        (score >= 12 && activeFilters.has('crit')) ||
+        (score >= 9 && score < 12 && activeFilters.has('high')) ||
+        (score >= 4 && score < 9  && activeFilters.has('mid'))  ||
+        (score < 4  && activeFilters.has('low'));
+      if (!levelOk) return false;
+    }
+    if (activeTagFilters.size > 0) {
+      const rTags = r.tags || [];
+      const matchesNoTag = activeTagFilters.has('__no_tag__') && rTags.length === 0;
+      const matchesTag = [...activeTagFilters].some(t => t !== '__no_tag__' && rTags.includes(t));
+      if (!matchesNoTag && !matchesTag) return false;
+    }
+    return true;
+  });
+}
+
+function getFilteredArchive() {
+  let sorted = [...archivedRisks];
+  if (archiveSort !== 'default') {
+    sorted.sort((a, b) => {
+      const sa = a.prob * a.sev, sb = b.prob * b.sev;
+      return archiveSort === 'desc' ? sb - sa : sa - sb;
+    });
+  } else {
+    sorted.reverse(); // newest first by default
+  }
+  return sorted.filter(r => {
+    const score = r.prob * r.sev;
+    if (archiveFilters.size > 0) {
+      const levelOk =
+        (score >= 12 && archiveFilters.has('crit')) ||
+        (score >= 9 && score < 12 && archiveFilters.has('high')) ||
+        (score >= 4 && score < 9  && archiveFilters.has('mid'))  ||
+        (score < 4  && archiveFilters.has('low'));
+      if (!levelOk) return false;
+    }
+    if (archiveTagFilters.size > 0) {
+      const rTags = r.tags || [];
+      const matchesNoTag = archiveTagFilters.has('__no_tag__') && rTags.length === 0;
+      const matchesTag = [...archiveTagFilters].some(t => t !== '__no_tag__' && rTags.includes(t));
+      if (!matchesNoTag && !matchesTag) return false;
+    }
+    return true;
+  });
+}
+
+function setArchiveSort(mode) {
+  archiveSort = mode;
+  ['default','desc','asc'].forEach(m => {
+    document.getElementById('sort-' + m).classList.toggle('active', m === mode);
+  });
+  buildList();
+}
+
+function applyArchiveFilter() {
+  archiveFilters = new Set();
+  ['crit','high','mid','low'].forEach(id => {
+    if (document.getElementById('filter-' + id).checked) archiveFilters.add(id);
+  });
+  updateTagDropdownForCurrentFilters();
+  updateFilterResetBtn();
+  updateTagFilterIndicator();
+  buildList();
+}
+
+function setSort(mode) {
+  currentSort = mode;
+  ['default','desc','asc'].forEach(m => {
+    document.getElementById('sort-' + m).classList.toggle('active', m === mode);
+  });
+  buildList();
+}
+
+function getSortedRisks() {
+  if (currentSort === 'default') return [...risks];
+  return [...risks].sort((a, b) => {
+    const scoreA = a.prob * a.sev;
+    const scoreB = b.prob * b.sev;
+    return currentSort === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+  });
+}
+
+// Custom select helpers
+function getCustomSelectValue(id) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return 1;
+  const opt = wrap.querySelector('.custom-select-option.selected');
+  return opt ? parseInt(opt.dataset.value) : 1;
+}
+
+function setCustomSelectValue(id, value) {
+  const wrap = document.getElementById(id);
+  if (!wrap) return;
+  const opts = wrap.querySelectorAll('.custom-select-option');
+  opts.forEach(o => {
+    const isMatch = parseInt(o.dataset.value) === value;
+    o.classList.toggle('selected', isMatch);
+    if (isMatch) { const t = [...o.childNodes].find(n => n.nodeType === 3); wrap.querySelector('.cs-value').textContent = t ? t.textContent.trim() : o.textContent.trim(); }
+  });
+}
+
+function toggleCustomSelect(id) {
+  const wrap = document.getElementById(id);
+  const btn  = wrap.querySelector('.custom-select-btn');
+  const list = wrap.querySelector('.custom-select-list');
+  const isOpen = list.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('.custom-select-list.open').forEach(l => l.classList.remove('open'));
+  document.querySelectorAll('.custom-select-btn.open').forEach(b => b.classList.remove('open'));
+  if (!isOpen) {
+    list.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function selectOption(id, value) {
+  const wrap = document.getElementById(id);
+  wrap.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+  const chosen = wrap.querySelector('[data-value="' + value + '"]');
+  if (chosen) {
+    chosen.classList.add('selected');
+    // Use only the text node (first child), not the percent span
+    const textNode = [...chosen.childNodes].find(n => n.nodeType === 3);
+    wrap.querySelector('.cs-value').textContent = textNode ? textNode.textContent.trim() : chosen.textContent.trim();
+  }
+  wrap.querySelector('.custom-select-list').classList.remove('open');
+  wrap.querySelector('.custom-select-btn').classList.remove('open');
+}
+
+function updateButtons() {
+  const isEmpty = risks.length === 0;
+  const isFilteredEmpty = !isEmpty && getFilteredRisks().length === 0;
+  const disableAll = isEmpty || isFilteredEmpty;
+  document.querySelector('[onclick="clearAll()"]').disabled = disableAll;
+  const exportXlsxBtn = document.getElementById('btn-export-xlsx'); if (exportXlsxBtn) exportXlsxBtn.disabled = disableAll;
+  document.querySelector('[onclick="exportPNG()"]').disabled = disableAll;
+  document.querySelector('[onclick="exportHTML()"]').disabled = disableAll;
+  // Sort depends on current tab
+  const visibleCount = currentTab === 'archive' ? getFilteredArchive().length : getFilteredRisks().length;
+  const disableSort = currentTab === 'archive' ? visibleCount <= 1 : (disableAll || visibleCount <= 1);
+  ['default','desc','asc'].forEach(m => {
+    const btn = document.getElementById('sort-' + m);
+    btn.disabled = disableSort;
+    if (disableSort) {
+      btn.classList.remove('active');
+    } else {
+      const activeMode = currentTab === 'archive' ? archiveSort : currentSort;
+      btn.classList.toggle('active', m === activeMode);
+    }
+  });
+  document.getElementById('filter-btn').disabled = currentTab === 'archive' ? false : isEmpty;
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-active').classList.toggle('active', tab === 'active');
+  document.getElementById('tab-archive').classList.toggle('active', tab === 'archive');
+  // Update sort buttons to match the tab state
+  if (tab === 'archive') {
+    ['default','desc','asc'].forEach(m => {
+      const btn = document.getElementById('sort-' + m);
+      btn.onclick = () => setArchiveSort(m);
+      btn.classList.toggle('active', m === archiveSort);
+    });
+    // Restore archive filter checkboxes
+    ['crit','high','mid','low'].forEach(id => {
+      document.getElementById('filter-' + id).checked = archiveFilters.has(id);
+    });
+  } else {
+    ['default','desc','asc'].forEach(m => {
+      const btn = document.getElementById('sort-' + m);
+      btn.onclick = () => setSort(m);
+      btn.classList.toggle('active', m === currentSort);
+    });
+    // Restore active filter checkboxes
+    ['crit','high','mid','low'].forEach(id => {
+      document.getElementById('filter-' + id).checked = activeFilters.has(id);
+    });
+  }
+  // Reset tag filter for current tab
+  const dd = document.getElementById('tag-filter-dropdown');
+  if (dd) dd.style.display = 'none';
+  updateTagFilterBtn();
+  updateFilterResetBtn();
+  updateTagFilterIndicator();
+  buildList();
+}
+
+let deletingRiskId = null;
+
+function openDeleteRisk(id) {
+  deletingRiskId = id;
+  const r = risks.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('delete-risk-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteRisk() {
+  document.getElementById('delete-risk-modal').classList.remove('open');
+  deletingRiskId = null;
+  document.body.style.overflow = '';
+}
+
+function confirmDeleteRisk() {
+  if (deletingRiskId === null) return;
+  removeRisk(deletingRiskId);
+  closeDeleteRisk();
+}
+
+function confirmArchiveRisk() {
+  if (deletingRiskId === null) return;
+  archiveRisk(deletingRiskId);
+  closeDeleteRisk();
+}
+
+function archiveRisk(id) {
+  const r = risks.find(x => x.id === id);
+  if (!r) return;
+  risks = risks.filter(x => x.id !== id);
+  archivedRisks.push({ ...r, archivedAt: Date.now() });
+  saveToStorage();
+  saveArchive();
+  render();
+}
+
+function restoreRisk(id) {
+  const r = archivedRisks.find(x => x.id === id);
+  if (!r) return;
+  archivedRisks = archivedRisks.filter(x => x.id !== id);
+  const { archivedAt, ...risk } = r;
+  risks.push(risk);
+  saveToStorage();
+  saveArchive();
+  render();
+}
+
+function render() {
+  buildGrid();
+  buildLeftAxis();
+  buildBottomAxis();
+  buildList();
+}
+
+// ===================== TAGS =====================
+let activeTagFilters = new Set(); // tags currently filtered by
+
+function getAllTags() {
+  const set = new Set();
+  risks.forEach(r => (r.tags || []).forEach(t => set.add(t)));
+  archivedRisks.forEach(r => (r.tags || []).forEach(t => set.add(t)));
+  return [...set].sort();
+}
+
+function getTagsForCurrentTab() {
+  const set = new Set();
+  const source = currentTab === 'archive' ? archivedRisks : risks;
+  source.forEach(r => (r.tags || []).forEach(t => set.add(t)));
+  const result = [...set].sort();
+  if (source.some(r => !r.tags || r.tags.length === 0)) result.unshift('__no_tag__');
+  return result;
+}
+
+// --- Tag input widget (used in form and modal) ---
+function initTagInput(wrapId, inputId, autocompleteId, getTagsFn, setTagsFn) {
+  const wrap = document.getElementById(wrapId);
+  const input = document.getElementById(inputId);
+  const ac = document.getElementById(autocompleteId);
+  // pills row is a sibling of wrap (right after it)
+  const pillsRow = wrap ? wrap.nextElementSibling : null;
+  if (!wrap || !input || !ac) return;
+
+  function renderPills() {
+    const container = pillsRow || wrap;
+    container.querySelectorAll('.tag-pill').forEach(p => p.remove());
+    const tags = getTagsFn();
+    tags.forEach((tag, i) => {
+      const pill = document.createElement('span');
+      pill.className = 'tag-pill';
+      pill.innerHTML = `#${escapeHTML(tag)}<span class="tag-pill-x" data-i="${i}">×</span>`;
+      pill.querySelector('.tag-pill-x').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const arr = getTagsFn();
+        arr.splice(+e.target.dataset.i, 1);
+        setTagsFn(arr);
+        hideTagError();
+        renderPills();
+      });
+      container.appendChild(pill);
+    });
+  }
+
+  let tagErrorTimer = null;
+  function showTagError(msg) {
+    const err = wrap.parentElement?.querySelector('.modal-error-msg[id$="tag-error"]');
+    if (!err) return;
+    err.textContent = msg;
+    err.classList.add('visible');
+    input.classList.add('error');
+    clearTimeout(tagErrorTimer);
+    tagErrorTimer = setTimeout(() => {
+      err.classList.remove('visible');
+      input.classList.remove('error');
+    }, 3000);
+  }
+  function hideTagError() {
+    const err = wrap.parentElement?.querySelector('.modal-error-msg[id$="tag-error"]');
+    if (!err) return;
+    clearTimeout(tagErrorTimer);
+    err.classList.remove('visible');
+    input.classList.remove('error');
+  }
+
+  function addTag(val) {
+    const tag = val.trim().replace(/,+$/, '').trim().toLowerCase();
+    if (!tag) return;
+    const arr = getTagsFn();
+    if (arr.includes(tag)) { input.value = ''; hideAC(); showTagError('Такой тег уже добавлен'); return; }
+    if (arr.length >= 4) { input.value = ''; hideAC(); showTagError('Максимальное количество тегов — 4'); return; }
+    arr.push(tag);
+    setTagsFn(arr);
+    input.value = '';
+    hideTagError();
+    renderPills();
+    hideAC();
+  }
+
+  function showAC(q) {
+    if (getTagsFn().length >= 4) { hideAC(); return; }
+    const all = getAllTags();
+    const current = getTagsFn();
+    const matches = all.filter(t => t.toLowerCase().includes(q.toLowerCase()) && !current.includes(t));
+    if (!matches.length || !q) { hideAC(); return; }
+    ac.innerHTML = '';
+    matches.slice(0, 8).forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'tag-autocomplete-item';
+      item.textContent = t;
+      item.addEventListener('mousedown', (e) => { e.preventDefault(); addTag(t); });
+      ac.appendChild(item);
+    });
+    ac.style.display = 'block';
+  }
+
+  function hideAC() { ac.style.display = 'none'; }
+
+  input.addEventListener('input', () => {
+    const val = input.value;
+    if (val.includes(',')) {
+      val.split(',').forEach(p => addTag(p));
+    } else {
+      showAC(val);
+    }
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addTag(input.value); }
+  });
+  input.addEventListener('blur', () => setTimeout(hideAC, 150));
+  input.addEventListener('focus', () => { if (input.value) showAC(input.value); });
+
+  // expose renderPills for external use
+  wrap._renderPills = renderPills;
+  renderPills();
+}
+
+// Temp tags state for form and modal
+let formTags = [];
+let modalTags = [];
+
+function initFormTagInput() {
+  formTags = [];
+  const row = document.getElementById('tag-pills-row');
+  if (row) row.innerHTML = '';
+  initTagInput('tag-input-wrap', 'tag-text-input', 'tag-autocomplete',
+    () => formTags,
+    (arr) => { formTags = arr; }
+  );
+}
+
+function initModalTagInput(existingTags) {
+  modalTags = [...(existingTags || [])];
+  initTagInput('modal-tag-wrap', 'modal-tag-input', 'modal-tag-autocomplete',
+    () => modalTags,
+    (arr) => { modalTags = arr; }
+  );
+  const wrap = document.getElementById('modal-tag-wrap');
+  if (wrap && wrap._renderPills) wrap._renderPills();
+}
+
+// --- Tag filter ---
+function getCurrentTagFilters() {
+  return currentTab === 'archive' ? archiveTagFilters : activeTagFilters;
+}
+
+function toggleTagDropdown() {
+  const dd = document.getElementById('tag-filter-dropdown');
+  const isOpen = dd.style.display !== 'none';
+  if (isOpen) {
+    dd.style.display = 'none';
+  } else {
+    renderTagDropdown();
+    dd.style.display = 'flex';
+  }
+}
+
+function renderTagDropdown() {
+  // Use level-filtered tags if a level filter is active, otherwise show all tags for the tab
+  const levelFilters = currentTab === 'archive' ? archiveFilters : activeFilters;
+  const tags = levelFilters.size > 0 ? getAvailableTagsForLevelFilter() : getTagsForCurrentTab();
+  renderTagDropdownWithTags(tags);
+}
+
+function updateTagFilterBtn() {
+  const levelFilters = currentTab === 'archive' ? archiveFilters : activeFilters;
+  const availableTags = levelFilters.size > 0 ? getAvailableTagsForLevelFilter() : getTagsForCurrentTab();
+  const selected = getCurrentTagFilters().size;
+  const label = document.getElementById('tag-filter-label');
+  const btn = document.getElementById('tag-filter-btn');
+  if (!label || !btn) return;
+  if (selected === 0) {
+    label.textContent = 'По тегу';
+    btn.classList.remove('active');
+  } else {
+    label.textContent = `Теги: ${selected} из ${availableTags.length}`;
+    btn.classList.add('active');
+  }
+}
+
+function onTagFilterInput() {}
+
+function renderTagFilterPills() {
+  updateTagFilterBtn();
+}
+
+function updateFilterResetBtn() {
+  const levelFilters = currentTab === 'archive' ? archiveFilters : activeFilters;
+  const tagFilters = getCurrentTagFilters();
+  const hasAny = levelFilters.size > 0 || tagFilters.size > 0;
+  const btn = document.getElementById('filter-reset-btn');
+  if (btn) btn.style.display = hasAny ? 'block' : 'none';
+}
+
+// Stores the currently available tags based on active level filter
+let _availableTagsCache = null;
+
+function getAvailableTagsForLevelFilter() {
+  const levelFiltered = currentTab === 'archive'
+    ? archivedRisks.filter(r => {
+        if (archiveFilters.size === 0) return true;
+        const s = r.prob * r.sev;
+        return (s >= 12 && archiveFilters.has('crit')) || (s >= 9 && s < 12 && archiveFilters.has('high')) ||
+               (s >= 4 && s < 9 && archiveFilters.has('mid')) || (s < 4 && archiveFilters.has('low'));
+      })
+    : risks.filter(r => {
+        if (activeFilters.size === 0) return true;
+        const s = r.prob * r.sev;
+        return (s >= 12 && activeFilters.has('crit')) || (s >= 9 && s < 12 && activeFilters.has('high')) ||
+               (s >= 4 && s < 9 && activeFilters.has('mid')) || (s < 4 && activeFilters.has('low'));
+      });
+  const availableTags = new Set();
+  levelFiltered.forEach(r => (r.tags || []).forEach(t => availableTags.add(t)));
+  const hasUntagged = levelFiltered.some(r => !r.tags || r.tags.length === 0);
+  const result = [...availableTags].sort();
+  if (hasUntagged) result.unshift('__no_tag__');
+  return result;
+}
+
+function updateTagDropdownForCurrentFilters() {
+  // Recalculate available tags based on level-filtered risks
+  const availableTags = getAvailableTagsForLevelFilter();
+  _availableTagsCache = availableTags;
+  // Also remove any active tag filters that are no longer available
+  const tagFilters = getCurrentTagFilters();
+  [...tagFilters].forEach(t => { if (!availableTags.includes(t)) tagFilters.delete(t); });
+  // Re-render tag dropdown with only available tags, keeping selected state
+  const dd = document.getElementById('tag-filter-dropdown');
+  if (!dd || dd.style.display === 'none') return;
+  renderTagDropdownWithTags(availableTags);
+}
+
+function updateLevelDropdownForCurrentTagFilters() {
+  // Recalculate which level filter options are available based on selected tag filters
+  const tagFilters = getCurrentTagFilters();
+  const source = currentTab === 'archive' ? archivedRisks : risks;
+  // If no tag filters active — restore all available levels
+  const levelCounts = { crit: 0, high: 0, mid: 0, low: 0 };
+  source.forEach(r => {
+    // If tag filters active, only count risks that match
+    if (tagFilters.size > 0) {
+      const rTags = r.tags || [];
+      if (![...tagFilters].some(t => rTags.includes(t))) return;
+    }
+    const s = r.prob * r.sev;
+    if (s >= 12) levelCounts.crit++;
+    else if (s >= 9) levelCounts.high++;
+    else if (s >= 4) levelCounts.mid++;
+    else levelCounts.low++;
+  });
+  ['crit','high','mid','low'].forEach(id => {
+    const optEl = document.getElementById('fo-' + id);
+    const countEl = document.getElementById('fc-' + id);
+    if (!optEl) return;
+    if (levelCounts[id] === 0) {
+      optEl.classList.add('disabled');
+    } else {
+      optEl.classList.remove('disabled');
+    }
+    if (countEl) countEl.textContent = levelCounts[id];
+  });
+}
+
+function renderTagDropdownWithTags(tags) {
+  const dd = document.getElementById('tag-filter-dropdown');
+  if (!dd) return;
+  const tagFilters = getCurrentTagFilters();
+  dd.innerHTML = '';
+  if (!tags.length) {
+    dd.innerHTML = '<div class="tag-filter-empty">Нет тегов</div>';
+    return;
+  }
+  tags.forEach((tag, idx) => {
+    const isNoTag = tag === '__no_tag__';
+    const item = document.createElement('label');
+    item.className = 'tag-filter-item';
+    if (isNoTag) item.style.cssText = 'color:var(--text-muted);font-style:italic;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = tagFilters.has(tag);
+    cb.addEventListener('change', () => {
+      if (cb.checked) getCurrentTagFilters().add(tag);
+      else getCurrentTagFilters().delete(tag);
+      updateTagFilterBtn();
+      updateFilterResetBtn();
+      updateTagFilterIndicator();
+      updateFilterCounts();
+      buildList();
+    });
+    item.appendChild(cb);
+    item.appendChild(document.createTextNode(isNoTag ? 'Без тега' : '#' + tag));
+    dd.appendChild(item);
+    // Divider after __no_tag__ if there are more items
+    if (isNoTag && tags.length > 1) {
+      const div = document.createElement('div');
+      div.style.cssText = 'border-top:1px solid var(--border-light);margin:3px 0;';
+      dd.appendChild(div);
+    }
+  });
+}
+
+function resetAllFilters() {
+  const levelFilters = currentTab === 'archive' ? 'archiveFilters' : 'activeFilters';
+  if (currentTab === 'archive') {
+    archiveFilters = new Set();
+    archiveTagFilters = new Set();
+  } else {
+    activeFilters = new Set();
+    activeTagFilters = new Set();
+  }
+  // Uncheck all level checkboxes
+  ['crit','high','mid','low'].forEach(id => {
+    document.getElementById('filter-' + id).checked = false;
+  });
+  updateTagFilterBtn();
+  updateFilterResetBtn();
+  updateTagFilterIndicator();
+  // Re-render tag dropdown with full list
+  const dd = document.getElementById('tag-filter-dropdown');
+  if (dd && dd.style.display !== 'none') renderTagDropdown();
+  buildList();
+}
+
+function updateTagFilterIndicator() {
+  const tagFilters = getCurrentTagFilters();
+  const levelFilters = currentTab === 'archive' ? archiveFilters : activeFilters;
+  const source = currentTab === 'archive' ? archivedRisks : risks;
+
+  // Level filter is "real" only if it's a strict subset of available levels
+  const allLevels = new Set();
+  source.forEach(r => {
+    const s = r.prob * r.sev;
+    if (s >= 12) allLevels.add('crit');
+    else if (s >= 9) allLevels.add('high');
+    else if (s >= 4) allLevels.add('mid');
+    else allLevels.add('low');
+  });
+  const levelIsReal = levelFilters.size > 0 && levelFilters.size < allLevels.size;
+
+  // Tag filter is "real" only if it's a strict subset of available tags
+  const availableTags = getAvailableTagsForLevelFilter();
+  const tagIsReal = tagFilters.size > 0 && tagFilters.size < availableTags.length;
+
+  document.getElementById('filter-btn').classList.toggle('active', levelIsReal || tagIsReal);
+}
+
+// ===================== END TAGS =====================
+
+function addRisk() {
+  const nameInput = document.getElementById('risk-name');
+  const errorMsg = document.getElementById('risk-name-error');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameInput.classList.add('error');
+    errorMsg.classList.add('visible');
+    nameInput.focus();
+    return;
+  }
+  nameInput.classList.remove('error');
+  errorMsg.classList.remove('visible');
+  const prob = getCustomSelectValue('cs-risk-prob');
+  const sev  = getCustomSelectValue('cs-risk-sev');
+  const newRisk = { id: nextId++, name, prob, sev, createdAt: Date.now(), tags: [...formTags] };
+  risks.push(newRisk);
+  nameInput.value = '';
+  formTags = [];
+  const wrap = document.getElementById('tag-input-wrap');
+  if (wrap && wrap._renderPills) wrap._renderPills();
+  // If new risk is hidden by current filter — reset all filters so user sees it
+  const score = newRisk.prob * newRisk.sev;
+  const level = score >= 12 ? 'crit' : score >= 9 ? 'high' : score >= 4 ? 'mid' : 'low';
+  if (activeFilters.size > 0 && !activeFilters.has(level)) {
+    activeFilters = new Set();
+    activeTagFilters = new Set();
+    ['crit','high','mid','low'].forEach(id => {
+      const cb = document.getElementById('filter-' + id);
+      if (cb) cb.checked = false;
+    });
+    updateTagFilterBtn();
+    updateFilterResetBtn();
+    document.getElementById('filter-btn').classList.remove('active');
+  }
+  saveToStorage();
+  render();
+}
+
+function removeArchivedRisk(id) {
+  archivedRisks = archivedRisks.filter(r => r.id !== id);
+  saveArchive();
+  buildList();
+}
+
+function removeRisk(id) {
+  risks = risks.filter(r => r.id !== id);
+  saveToStorage();
+  render();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const nameInput = document.getElementById('risk-name');
+  const errorMsg = document.getElementById('risk-name-error');
+  nameInput.addEventListener('input', () => {
+    if (nameInput.value.trim()) {
+      nameInput.classList.remove('error');
+      errorMsg.classList.remove('visible');
+    }
+  });
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') addRisk();
+  });
+
+  document.getElementById('modal-name').addEventListener('input', () => {
+    const i = document.getElementById('modal-name');
+    if (i.value.trim()) {
+      i.classList.remove('error');
+      document.getElementById('modal-name-error').classList.remove('visible');
+    }
+  });
+  document.getElementById('modal-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveEdit();
+    if (e.key === 'Escape') closeModal();
+  });
+  document.getElementById('edit-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('edit-modal')) closeModal();
+  });
+  document.getElementById('confirm-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('confirm-modal')) closeConfirm();
+  });
+  document.getElementById('delete-risk-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('delete-risk-modal')) closeDeleteRisk();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('confirm-modal').classList.contains('open')) closeConfirm();
+      else if (document.getElementById('delete-risk-modal').classList.contains('open')) closeDeleteRisk();
+      else if (document.getElementById('edit-modal').classList.contains('open')) closeModal();
+      else document.getElementById('filter-dropdown').classList.remove('open');
+    }
+  });
+  document.addEventListener('click', e => {
+    const wrap = document.getElementById('filter-btn')?.closest('.filter-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('filter-dropdown').classList.remove('open');
+    }
+    if (!e.target.closest('.tag-filter-wrap')) {
+      const dd = document.getElementById('tag-filter-dropdown');
+      if (dd) dd.style.display = 'none';
+    }
+    if (!e.target.closest('.custom-select')) {
+      document.querySelectorAll('.custom-select-list.open').forEach(l => l.classList.remove('open'));
+      document.querySelectorAll('.custom-select-btn.open').forEach(b => b.classList.remove('open'));
+    }
+  });
+  render();
+  initFormTagInput();
+  document.body.style.visibility = 'visible';
+});
+
+// Повторная отрисовка при изменении размера
+window.addEventListener('resize', () => { buildGrid(); });
+
+function exportXLSX() {
+  const PROB_LABELS = {1:'Маловероятно',2:'Иногда',3:'Часто',4:'Почти наверняка'};
+  const SEV_LABELS  = {1:'Незначительное',2:'Умеренное',3:'Серьёзное',4:'Критическое'};
+  const LEVEL_COLORS = {
+    'Критический':'B71C1C','Высокий':'E65100','Средний':'F9A825','Низкий':'4CAF50'
+  };
+  function getLevel(s){ return s>=12?'Критический':s>=9?'Высокий':s>=4?'Средний':'Низкий'; }
+  function fmtDate(ts){ if(!ts) return ''; const d=new Date(ts); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); }
+
+  function buildSheet(wb, sheetName, rows, isArchive) {
+    // Порядок: ID, Название, Вероятность, Вер.(описание), Влияние, Вл.(описание), Теги, Score, Уровень, Дата добавления [, Дата архивирования]
+    const headers = ['ID*','Название риска*','Вероятность*','Вероятность (описание)','Влияние*','Влияние (описание)','Теги','Score','Уровень риска','Дата добавления'];
+    if (isArchive) headers.push('Дата архивирования');
+
+    // Ширины: ID=6, Название=43, Вероятность=18, Вер.оп=26, Влияние=18, Вл.оп=26, Теги=24, Score=8, Уровень=20, Дата=20
+    const colWidths = [6,43,18,26,18,26,24,8,20,20];
+    if (isArchive) colWidths.push(24);
+
+    const ws = {};
+    const range = {s:{c:0,r:0},e:{c:headers.length-1,r:rows.length}};
+
+    // Обязательные колонки — синие, необязательные — серые
+    // ci: 0=ID*, 1=Название*, 2=Вер*, 3=Вер.оп(ro), 4=Вл*, 5=Вл.оп(ro), 6=Теги(ro), 7=Score(ro), 8=Уровень(ro), 9=Дата(ro)
+    const HEADER_BLUE='2196F3', HEADER_GREY='BDBDBD', WHITE='FFFFFF', GREY555='555555';
+    const readonlyCols = new Set([3,5,6,7,8,9]);
+    if (isArchive) readonlyCols.add(10);
+
+    headers.forEach((h,ci) => {
+      const addr = XLSX.utils.encode_cell({r:0,c:ci});
+      const isRo = readonlyCols.has(ci);
+      ws[addr] = {
+        v: h, t:'s',
+        s: {
+          font:{bold:true,color:{rgb: isRo?GREY555:WHITE},name:'Arial',sz:12},
+          fill:{patternType:'solid',fgColor:{rgb: isRo?HEADER_GREY:HEADER_BLUE}},
+          alignment:{horizontal:'center',vertical:'center',wrapText:true},
+          border:{top:{style:'thin',color:{rgb:'000000'}},bottom:{style:'thin',color:{rgb:'000000'}},left:{style:'thin',color:{rgb:'000000'}},right:{style:'thin',color:{rgb:'000000'}}}
+        }
+      };
+    });
+
+    // Data rows
+    rows.forEach((r,ri) => {
+      const score = r.prob * r.sev;
+      const level = getLevel(score);
+      const row = [
+        r.id, r.name,
+        r.prob, PROB_LABELS[r.prob]||'',
+        r.sev,  SEV_LABELS[r.sev]||'',
+        (r.tags || []).join(', '),
+        score,  level,
+        fmtDate(r.createdAt)
+      ];
+      if (isArchive) row.push(fmtDate(r.archivedAt));
+
+      row.forEach((v,ci) => {
+        const addr = XLSX.utils.encode_cell({r:ri+1,c:ci});
+        const isLevel = ci===8;
+        const lvlColor = LEVEL_COLORS[level]||'FFFFFF';
+        ws[addr] = {
+          v, t: typeof v==='number'?'n':'s',
+          s: {
+            font:{name:'Arial',sz:12,color:{rgb: isLevel?WHITE:'000000'},bold:isLevel},
+            fill:{patternType:'solid',fgColor:{rgb: isLevel?lvlColor:'FFFFFF'}},
+            alignment:{horizontal:'center', vertical:'center', wrapText:true},
+            border:{top:{style:'thin',color:{rgb:'000000'}},bottom:{style:'thin',color:{rgb:'000000'}},left:{style:'thin',color:{rgb:'000000'}},right:{style:'thin',color:{rgb:'000000'}}}
+          }
+        };
+      });
+    });
+
+    ws['!ref'] = XLSX.utils.encode_range(range);
+    ws['!cols'] = colWidths.map(w=>({wch:w}));
+    ws['!rows'] = [{hpt:40}].concat(rows.map(()=>({hpt:50})));
+    ws['!freeze'] = {xSplit:0, ySplit:1, topLeftCell:'A2', activePane:'bottomLeft'};
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  }
+
+  const wb = XLSX.utils.book_new();
+  buildSheet(wb, 'Активные', getFilteredRisks(), false);
+  buildSheet(wb, 'Архив', archivedRisks, true);
+  XLSX.writeFile(wb, 'risk_matrix.xlsx', {bookType:'xlsx',cellStyles:true});
+}
+
+
+
+function importXLSX(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const wb = XLSX.read(ev.target.result, {type:'array'});
+
+      function parseSheet(ws, isArchive) {
+        const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+        const result = [];
+        for (const row of rows) {
+          const id   = parseInt(row['ID*'] || row['ID']);
+          const name = (row['Название риска*'] || row['Название риска'] || '').toString().trim();
+          const prob = parseInt(row['Вероятность*'] || row['Вероятность']);
+          const sev  = parseInt(row['Влияние*'] || row['Влияние']);
+          if (!id || isNaN(id)) { showImportError('У одного из рисков не заполнен ID'); return null; }
+          if (!name) { showImportError('У одного из рисков не заполнено название'); return null; }
+          if (![1,2,3,4].includes(prob)) { showImportError('Вероятность должна быть от 1 до 4 (риск ID '+id+')'); return null; }
+          if (![1,2,3,4].includes(sev))  { showImportError('Влияние должно быть от 1 до 4 (риск ID '+id+')'); return null; }
+          const rawDate = row['Дата добавления'] || '';
+          let createdAt = Date.now();
+          if (rawDate) {
+            const parts = rawDate.toString().split('.');
+            if (parts.length===3) {
+              const d = new Date(+parts[2], +parts[1]-1, +parts[0]);
+              if (!isNaN(d.getTime())) createdAt = d.getTime();
+            }
+          }
+          const risk = {id, name, prob, sev, createdAt};
+          const rawTags = (row['Теги'] || '').toString().trim();
+          if (rawTags) {
+            risk.tags = rawTags.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).slice(0, 4);
+          }
+          if (isArchive) {
+            const rawArchive = row['Дата архивирования'] || '';
+            let archivedAt = Date.now();
+            if (rawArchive) {
+              const parts = rawArchive.toString().split('.');
+              if (parts.length===3) {
+                const d = new Date(+parts[2], +parts[1]-1, +parts[0]);
+                if (!isNaN(d.getTime())) archivedAt = d.getTime();
+              }
+            }
+            risk.archivedAt = archivedAt;
+          }
+          result.push(risk);
+        }
+        return result;
+      }
+
+      const wsActive  = wb.Sheets['Активные'];
+      const wsArchive = wb.Sheets['Архив'];
+      if (!wsActive) { showImportError('Лист «Активные» не найден'); return; }
+
+      const newRisks   = parseSheet(wsActive, false);
+      const newArchive = wsArchive ? parseSheet(wsArchive, true) : [];
+      if (!newRisks || !newArchive) return;
+
+      // Check duplicate IDs
+      const allIds = [...newRisks, ...newArchive].map(r=>r.id);
+      if (new Set(allIds).size !== allIds.length) { showImportError('В файле есть дублирующиеся ID'); return; }
+
+      risks = newRisks;
+      archivedRisks = newArchive.length > 0 ? newArchive : DEFAULT_ARCHIVE.map(r=>({...r}));
+      nextId = allIds.length > 0 ? Math.max(...allIds) + 1 : 1;
+      saveToStorage();
+      saveArchive();
+      currentSort = 'default';
+      ['default','desc','asc'].forEach(m => {
+        const btn = document.getElementById('sort-' + m);
+        if (btn) btn.classList.toggle('active', m === 'default');
+      });
+      render();
+    } catch(err) {
+      showImportError('Ошибка чтения файла: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+}
+
+function clearAll() {
+  document.getElementById('confirm-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function confirmClear() {
+  risks = [];
+  archivedRisks = DEFAULT_ARCHIVE.map(r => ({...r}));
+  try { localStorage.removeItem(LS_ARCHIVE_KEY); } catch(e) {}
+  nextId = 1;
+  saveToStorage();
+  // Reset sort to default
+  currentSort = 'default';
+  // Reset filter to none selected (empty = show all)
+  activeFilters = new Set();
+  activeTagFilters = new Set();
+  ['crit','high','mid','low'].forEach(id => {
+    const el = document.getElementById('filter-' + id);
+    if (el) el.checked = false;
+  });
+  document.getElementById('filter-btn').classList.remove('active');
+  render();
+  closeConfirm();
+}
+
+function exportPNG() {
+  const isDark = document.body.classList.contains('dark');
+  const bg = isDark ? '#1e1e1e' : '#ffffff';
+
+  const doExport = () => {
+    const el = document.querySelector('.grid-section');
+    html2canvas(el, {
+      backgroundColor: bg,
+      scale: 2,
+      useCORS: true,
+      scrollX: -window.scrollX,
+      scrollY: -window.scrollY,
+      onclone: (doc) => {
+        if (isDark) doc.body.classList.add('dark');
+      }
+    }).then(canvas => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'risk_matrix.png';
+      a.click();
+    });
+  };
+
+  if (typeof html2canvas === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload = doExport;
+    document.head.appendChild(script);
+  } else {
+    doExport();
+  }
+}
+
+function exportHTML() {
+  const clone = document.documentElement.cloneNode(true);
+  const scripts = clone.querySelectorAll('script:not([src])');
+  scripts.forEach(s => {
+    if (s.textContent.includes('loadFromStorage')) {
+      const dataLine = 'window.__EXPORTED__ = ' + JSON.stringify({ risks, nextId }) + ';';
+      const patch = 'function loadFromStorage() { if (window.__EXPORTED__) { var d = window.__EXPORTED__; window.__EXPORTED__ = null; return d; }';
+      s.textContent = dataLine + '\n' + s.textContent.replace('function loadFromStorage() {', patch);
+    }
+  });
+  const blob = new Blob(['<!DOCTYPE html>' + clone.outerHTML], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'risk_matrix_shared.html';
+  a.click();
+}
+
+function toggleTheme() {
+  // Отключите все переходы при смене темы, чтобы предотвратить мерцание
+  const style = document.createElement('style');
+  style.textContent = '* { transition: none !important; }';
+  document.head.appendChild(style);
+
+  const isDark = document.body.classList.toggle('dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('rm_theme', isDark ? 'dark' : 'light');
+
+  // Повторно включите переходы после перерисовки
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.head.removeChild(style);
+    });
+  });
+}
+
+// Применить сохраненную тему — класс dark-early уже установлен в <head>, теперь завершить
+(function() {
+  if (localStorage.getItem('rm_theme') === 'dark') {
+    document.body.classList.add('dark');
+    document.documentElement.classList.remove('dark-early');
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = '☀️';
+    });
+  } else {
+    document.documentElement.classList.remove('dark-early');
+  }
+})();
+
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scroll-top');
+  if (!btn) return;
+  if (window.scrollY > 400) {
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+});
+
+</script>
+</body>
+</html>
