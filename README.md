@@ -1,4 +1,4 @@
-# Risk Matrix Tool
+# Risk Matrix Tool 📊
 
 Простой инструмент для приоритизации рисков по вероятности и влиянию.
 
@@ -11,21 +11,19 @@
 
 Попробовать можно по ссылке: https://kinocenitel.github.io/rmt
 
-## 👀 Preview
+## 🖼️ Preview
 
 ![Демонстрация](images/RMT.gif)
 
-*Пример работы*
-
-## ⚡ Features
+## 🧩 Features
 
 - Создание, редактирование и удаление рисков
-- Сортировка по Score (критичность)
-- Фильтрация по тегам и значению Score
+- Сортировка по score (уровень риска)
+- Фильтрация по тегам и значению score
 - Быстрое выявление «красных» зон
 - Наглядная и понятная визуализация
 
-## 🧠 Why
+## 🎯 Why
 
 Команды часто тратят время не туда:
 - риски не структурированы
@@ -34,7 +32,7 @@
 
 Матрица помогает навести порядок и сфокусироваться на действительно важном.
 
-## 💼 Use cases
+## 👥 Use cases
 
 - QA — приоритизация тест-кейсов и багов
 - PM — планирование
@@ -56,14 +54,14 @@ cd rmt
 open index.html
 ```
 
-## 🧩 Tech stack
+## ⚙️ Tech stack
 
 - Vanilla HTML
 - CSS
 - JavaScript (single-file, no build tools)
-- [xlsx-js-style](https://github.com/gitbrent/xlsx-js-style) — Экспорт в Excel с сохранением стилей ячеек.
+- [xlsx-js-style](https://github.com/gitbrent/xlsx-js-style) — экспорт в Excel с сохранением стилей ячеек.
 
-## License
+## ⚖️ License
 
 MIT License © 2026 Aleksey Bondarenko
 

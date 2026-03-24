@@ -161,6 +161,8 @@
   .tag-filter-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; height: 30px; font-size: 12px; font-family: inherit; background: var(--btn-bg); color: var(--btn-text); border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; gap: 6px; }
   .tag-filter-btn:hover { background: var(--bg-hover); }
   .tag-filter-btn.active { border-color: #2196f3; color: #2196f3; }
+  .tag-filter-btn.open { border-color: #2196f3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
+  .tag-filter-btn.open .custom-select-arrow { transform: translateY(-50%) rotate(180deg); }
   .tag-filter-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg-modal); border: 1.5px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 300; padding: 4px; display: flex; flex-direction: column; gap: 1px; max-height: 200px; overflow-y: auto; }
   .tag-filter-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--text-primary); transition: background 0.12s; user-select: none; }
   .tag-filter-item:hover { background: var(--bg-hover); }
@@ -293,7 +295,7 @@
   .footer { margin-top: 36px; padding: 12px 0; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
   .footer a { color: var(--text-muted); text-decoration: none; }
   .footer a:hover { color: var(--text-secondary); text-decoration: underline; }
-  .footer-dot { opacity: 0.4; }
+  .footer-dot { opacity: 0.7; font-size: 15px; }
 
   /* Archive tabs */
   .list-tabs { display: flex; gap: 4px; margin-top: 10px; margin-bottom: 12px; background: var(--bg-secondary); border-radius: 8px; padding: 3px; }
@@ -439,12 +441,12 @@
 
         <button class="tool-btn" onclick="exportPNG()" title="Скачать матрицу как картинку">🖼 <span class="btn-text">Экспорт PNG</span></button>
         <button class="tool-btn" onclick="exportHTML()" title="Скачать HTML-файл с текущими рисками">📄 <span class="btn-text">Поделиться</span></button>
-        <button class="tool-btn danger" onclick="clearAll()" title="Очистить все риски">✕ <span class="btn-text">Очистить</span></button>
+        <button class="tool-btn danger" onclick="clearAll()" title="Удалить все риски">✕ <span class="btn-text">Очистить</span></button>
       </div>
       <div class="import-error" id="import-error"></div>
       <div class="list-tabs">
-        <button class="list-tab active" id="tab-active" onclick="switchTab('active')">Активные <span class="archive-badge" id="tab-active-count">0</span></button>
-        <button class="list-tab" id="tab-archive" onclick="switchTab('archive')">Архив <span class="archive-badge" id="tab-archive-count">0</span></button>
+        <button class="list-tab active" id="tab-active" onclick="switchTab('active')" title="Активные риски">Активные <span class="archive-badge" id="tab-active-count">0</span></button>
+        <button class="list-tab" id="tab-archive" onclick="switchTab('archive')" title="Закрытые риски">Архив <span class="archive-badge" id="tab-archive-count">0</span></button>
       </div>
       <div class="section-title" style="margin-bottom:10px;">Список рисков:</div>
       <div class="sort-bar">
@@ -453,7 +455,7 @@
         <button class="sort-btn" id="sort-desc" onclick="setSort('desc')"><span class="sort-icon">↓</span><span class="btn-text"> По убыванию</span></button>
         <button class="sort-btn" id="sort-asc" onclick="setSort('asc')"><span class="sort-icon">↑</span><span class="btn-text"> По возрастанию</span></button>
         <div class="filter-wrap">
-          <button class="filter-btn" id="filter-btn" onclick="toggleFilter()" title="Фильтр по уровню риска">
+          <button class="filter-btn" id="filter-btn" onclick="toggleFilter()" title="Фильтр по уровню риска и тегам">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M1 2.5h12M3 7h8M5.5 11.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
@@ -500,9 +502,10 @@
 
   </div>
   <div class="footer">
-    <span>© 2026 Bondarenko <span class="footer-dot">·</span> <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a> <span class="footer-dot">·</span> v1.0.0</span>
-    <div style="display:flex;align-items:center;gap:12px;">
+    <span>© 2026 <a href="https://github.com/kinocenitel" target="_blank" rel="noopener" title="GitHub — профиль">Bondarenko</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/LICENSE" target="_blank" rel="noopener" title="GitHub — лицензия">MIT License</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/CHANGELOG.md" target="_blank" rel="noopener" title="GitHub — Changelog">v1.0.1</a></span>
+    <div style="display:flex;align-items:center;gap:8px;">
       <a href="https://avbondarenko.yonote.ru/share/risk-matrix" target="_blank" rel="noopener" title="Гайд по матрице рисков">FAQ</a>
+      <span class="footer-dot">·</span>
       <a href="https://t.me/qa_https" target="_blank" rel="noopener" title="Telegram">Feedback</a>
     </div>
   </div>
@@ -527,8 +530,8 @@
     <div class="confirm-title">Точно удалить этот риск?</div>
     <div class="confirm-text">Его можно добавить в архив</div>
     <div class="confirm-btns">
-      <button class="confirm-cancel" onclick="confirmArchiveRisk()">В архив</button>
       <button class="confirm-ok" onclick="confirmDeleteRisk()">Удалить</button>
+      <button class="confirm-cancel" onclick="confirmArchiveRisk()">В архив</button>
     </div>
   </div>
 </div>
@@ -975,14 +978,14 @@ function buildList() {
       if (dot) dot.classList.remove('highlighted');
     });
     item.innerHTML = `
-      <div class="drag-handle" title="Перетащить">⠿</div>
+      <div class="drag-handle" title="Переместить">⠿</div>
       <div class="risk-badge" style="background:${dotColorById(r.id)}"></div>
       <div style="flex:1;min-width:0;">
-        <span class="risk-item-name" title="Нажмите для редактирования">${escapeHTML(r.name)}</span>
+        <span class="risk-item-name" title="Редактировать">${escapeHTML(r.name)}</span>
         ${(r.tags && r.tags.length) ? `<div class="risk-tags">${r.tags.map(t => `<span class="risk-tag-pill">#${escapeHTML(t)}</span>`).join('')}</div>` : ''}
       </div>
       <span class="risk-item-meta">X${r.prob}·Y${r.sev}=${score} <span style="color:${textColor};font-weight:500">${label}</span></span>
-      <span class="risk-del"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <span class="risk-del" title="Удалить или архивировать"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
     `;
     item.querySelector('.risk-item-name').addEventListener('click', () => openModal(r.id));
     item.querySelector('.risk-del').addEventListener('click', (e) => { e.stopPropagation(); openDeleteRisk(r.id); });
@@ -1253,7 +1256,7 @@ function switchTab(tab) {
   }
   // Reset tag filter for current tab
   const dd = document.getElementById('tag-filter-dropdown');
-  if (dd) dd.style.display = 'none';
+  if (dd) { dd.style.display = 'none'; const btn = document.getElementById('tag-filter-btn'); if (btn) btn.classList.remove('open'); }
   updateTagFilterBtn();
   updateFilterResetBtn();
   updateTagFilterIndicator();
@@ -1468,12 +1471,15 @@ function getCurrentTagFilters() {
 
 function toggleTagDropdown() {
   const dd = document.getElementById('tag-filter-dropdown');
+  const btn = document.getElementById('tag-filter-btn');
   const isOpen = dd.style.display !== 'none';
   if (isOpen) {
     dd.style.display = 'none';
+    btn.classList.remove('open');
   } else {
     renderTagDropdown();
     dd.style.display = 'flex';
+    btn.classList.add('open');
   }
 }
 
@@ -1766,7 +1772,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (!e.target.closest('.tag-filter-wrap')) {
       const dd = document.getElementById('tag-filter-dropdown');
-      if (dd) dd.style.display = 'none';
+      if (dd) { dd.style.display = 'none'; const btn = document.getElementById('tag-filter-btn'); if (btn) btn.classList.remove('open'); }
     }
     if (!e.target.closest('.custom-select')) {
       document.querySelectorAll('.custom-select-list.open').forEach(l => l.classList.remove('open'));
@@ -1867,6 +1873,28 @@ function exportXLSX() {
 
 
 
+function parseExcelDate(raw) {
+  if (!raw) return null;
+  // Excel serial number (e.g. 45000)
+  if (typeof raw === 'number') {
+    // Excel epoch: Jan 1 1900 = serial 1; with leap year bug serial 60 = Feb 29 1900 (non-existent)
+    const ms = (raw - 25569) * 86400 * 1000;
+    const d = new Date(ms);
+    if (!isNaN(d.getTime())) return d.getTime();
+  }
+  // String dd.mm.yyyy
+  const s = raw.toString().trim();
+  const parts = s.split('.');
+  if (parts.length === 3) {
+    const d = new Date(+parts[2], +parts[1] - 1, +parts[0]);
+    if (!isNaN(d.getTime())) return d.getTime();
+  }
+  // ISO string yyyy-mm-dd
+  const iso = new Date(s);
+  if (!isNaN(iso.getTime())) return iso.getTime();
+  return null;
+}
+
 function importXLSX(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -1890,11 +1918,8 @@ function importXLSX(e) {
           const rawDate = row['Дата добавления'] || '';
           let createdAt = Date.now();
           if (rawDate) {
-            const parts = rawDate.toString().split('.');
-            if (parts.length===3) {
-              const d = new Date(+parts[2], +parts[1]-1, +parts[0]);
-              if (!isNaN(d.getTime())) createdAt = d.getTime();
-            }
+            const parsed = parseExcelDate(rawDate);
+            if (parsed) createdAt = parsed;
           }
           const risk = {id, name, prob, sev, createdAt};
           const rawTags = (row['Теги'] || '').toString().trim();
@@ -1905,11 +1930,8 @@ function importXLSX(e) {
             const rawArchive = row['Дата архивирования'] || '';
             let archivedAt = Date.now();
             if (rawArchive) {
-              const parts = rawArchive.toString().split('.');
-              if (parts.length===3) {
-                const d = new Date(+parts[2], +parts[1]-1, +parts[0]);
-                if (!isNaN(d.getTime())) archivedAt = d.getTime();
-              }
+              const parsed = parseExcelDate(rawArchive);
+              if (parsed) archivedAt = parsed;
             }
             risk.archivedAt = archivedAt;
           }
@@ -1993,6 +2015,16 @@ function exportPNG() {
       scrollY: -window.scrollY,
       onclone: (doc) => {
         if (isDark) doc.body.classList.add('dark');
+        const mutedColor = isDark ? '#666666' : '#999999';
+        const textColor  = isDark ? '#d4d4d4' : '#383838';
+        doc.querySelectorAll('input[type=text], input:not([type])').forEach(inp => {
+          if (!inp.value && inp.placeholder) {
+            inp.value = inp.placeholder;
+            inp.style.color = mutedColor;
+          } else {
+            inp.style.color = textColor;
+          }
+        });
       }
     }).then(canvas => {
       const a = document.createElement('a');
