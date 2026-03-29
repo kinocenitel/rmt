@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Матрица рисков</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjEzIiBoZWlnaHQ9IjEzIiByeD0iMyIgZmlsbD0iIzgxYzc4NCIvPgogIDxyZWN0IHg9IjE4IiB5PSIxIiB3aWR0aD0iMTMiIGhlaWdodD0iMTMiIHJ4PSIzIiBmaWxsPSIjZjlhODI1Ii8+CiAgPHJlY3QgeD0iMSIgeT0iMTgiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjMiIGZpbGw9IiNlNjUxMDAiLz4KICA8cmVjdCB4PSIxOCIgeT0iMTgiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjMiIGZpbGw9IiNiNzFjMWMiLz4KPC9zdmc+"><script>if(localStorage.getItem("rm_theme")==="dark")document.documentElement.classList.add("dark-early");</script><script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Матрица рисков</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3QgeD0iMSIgeT0iMSIgd2lkdGg9IjEzIiBoZWlnaHQ9IjEzIiByeD0iMyIgZmlsbD0iI2U2NTEwMCIvPgogIDxyZWN0IHg9IjE4IiB5PSIxIiB3aWR0aD0iMTMiIGhlaWdodD0iMTMiIHJ4PSIzIiBmaWxsPSIjYjcxYzFjIi8+CiAgPHJlY3QgeD0iMSIgeT0iMTgiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjMiIGZpbGw9IiM0Y2FmNTAiLz4KICA8cmVjdCB4PSIxOCIgeT0iMTgiIHdpZHRoPSIxMyIgaGVpZ2h0PSIxMyIgcng9IjMiIGZpbGw9IiNmOWE4MjUiLz4KPC9zdmc+"><script>if(localStorage.getItem("rm_theme")==="dark")document.documentElement.classList.add("dark-early");if(localStorage.getItem("rm_matrix_collapsed")==="1")document.documentElement.classList.add("matrix-collapsed-early");</script><script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
-<body style="margin:0;padding:16px;visibility:hidden;">
+<body style="margin:0;padding:16px;padding-top:56px;visibility:hidden;min-height:100vh;display:flex;flex-direction:column;min-width:320px;">
 <style>
   * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
   *, *::before, *::after { box-sizing: border-box; }
+  html { min-width: 320px; }
 
   /* Светлая тема (по умолчанию) */
   body {
@@ -58,14 +59,14 @@
   }
 
   /* Кнопка переключения темы */
-  .theme-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--text-secondary); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s ease, background 0.15s; }
-  .theme-toggle:hover { background: var(--bg-hover); transform: scale(1.15); }
   .scroll-top { position: fixed; bottom: 60px; left: 24px; z-index: 50; width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--text-secondary); cursor: pointer; font-size: 16px; display: none; align-items: center; justify-content: center; transition: opacity 0.2s, transform 0.2s; opacity: 0.5; }
   .scroll-top:hover { background: var(--bg-hover); opacity: 1; }
   .scroll-top.visible { display: flex; }
 
-  .wrap { padding: 1rem 0; font-size: 14px; color: var(--text-primary); }
-  .grid-section { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .wrap { padding: 1rem 0; font-size: 14px; color: var(--text-primary); flex: 1; display: flex; flex-direction: column; }
+  /* В collapsed-режиме добавляем отступ слева под fixed-элементы (кнопка 30px + gap 12px + 12px offset = 54px) */
+  /* collapsed: wrap без лишних отступов — бейджи в шапке */
+  .grid-section { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; flex: 1; padding-bottom: 32px; }
   .matrix-container { flex: 1 1 340px; min-width: 300px; }
 
   .matrix-layout { display: flex; gap: 0; }
@@ -93,7 +94,6 @@
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 14px; color: var(--text-secondary); }
   .legend-box { width: 16px; height: 16px; border-radius: 4px; }
 
-  .sidebar { flex: 1 1 270px; min-width: 240px; }
   .risk-form { background: var(--bg-secondary); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
   .risk-form label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; margin-top: 10px; }
   .risk-form label:first-of-type { margin-top: 10px; }
@@ -183,9 +183,9 @@
   .risk-item-name { flex: 1; font-size: 14px; cursor: pointer; color: var(--text-primary); }
   .risk-item-name:hover { text-decoration: underline; color: #2196f3; }
 
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 300; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--bg-modal); border-radius: 8px; padding: 24px; width: 100%; max-width: 360px; }
+  .modal { background: var(--bg-modal); border-radius: 8px; padding: 24px; width: 100%; max-width: 520px; }
   .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .modal-title { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 0; }
   .modal-close { width: 28px; height: 28px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; transition: transform 0.15s ease, background 0.15s, color 0.15s; }
@@ -212,7 +212,7 @@
   .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
   .filter-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
   .filter-btn:disabled.active { background: var(--btn-bg); color: var(--text-muted); border-color: var(--border); }
-  .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
+  .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 310; align-items: center; justify-content: center; }
   .confirm-overlay.open { display: flex; }
   .confirm-modal { background: var(--bg-modal); border-radius: 8px; padding: 28px 24px 20px; width: 100%; max-width: 320px; text-align: center; position: relative; }
   .confirm-icon { font-size: 32px; margin-bottom: 12px; }
@@ -224,39 +224,283 @@
   .confirm-ok { flex: 1; height: 38px; font-size: 14px; cursor: pointer; background: #e53935; color: #fff; border: none; border-radius: 8px; font-family: inherit; }
   .confirm-ok:hover { background: #c62828; }
 
-  .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; }
   .list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .import-error { font-size: 12px; color: #e53935; margin-top: 10px; margin-bottom: 10px; display: none; padding: 6px 10px; background: #fff5f5; border-radius: 8px; border: 1px solid #f5c6c6; }
   .import-error.visible { display: block; }
   body.dark .import-error { background: #2d1f1f; border-color: #7a2020; }
 
 
-  /* ── Адаптивы ── */
+  /* ── Фиксированная шапка — всегда поверх контента ── */
+  .fixed-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 54px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-light);
+    gap: 8px;
+  }
+  .matrix-toggle-btn,
+  .theme-toggle {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--btn-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+    line-height: 1; user-select: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+  .theme-toggle { margin-left: auto; }
+  .theme-toggle {
+    width: 64px !important;
+    height: 30px !important;
+    border-radius: 30px !important;
+    padding: 0 !important;
+    border: 1.5px solid var(--border) !important;
+    background: #e8e8e8 !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12) !important;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.25s, border-color 0.25s !important;
+  }
+  body.dark .theme-toggle {
+    background: #2a2a2a !important;
+    border-color: #555 !important;
+  }
+  .theme-toggle:hover {
+    border-color: var(--border-hover) !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.12) !important;
+  }
+  /* Ползунок — всегда белый круг */
+  .theme-toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    display: flex; align-items: center; justify-content: center;
+    color: #555;
+    flex-shrink: 0;
+  }
+  body.dark .theme-toggle-knob {
+    transform: translateX(34px);
+    color: #444;
+  }
+  .theme-toggle-knob svg { width: 12px; height: 12px; }
+  .ti-sun { display: block; }
+  .ti-moon { display: none; }
+  body.dark .ti-sun { display: none; }
+  body.dark .ti-moon { display: block; }
+  /* Иконки трека скрыты — иконка только на ползунке */
+  .theme-toggle-icons { display: none; }
+  .matrix-toggle-btn:hover,
+  .theme-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-secondary);
+    border-color: var(--border-hover);
+  }
 
-  /* Планшет */
+  /* Collapsed-состояние матрицы — схлопываем в ноль, полоса fixed */
+  .matrix-collapsed .matrix-container {
+    flex: 0 0 0px;
+    min-width: 0;
+    max-width: 0;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  /* Скрываем всё внутри matrix-container кроме collapsed-strip */
+  .matrix-collapsed .matrix-container .matrix-layout,
+  .matrix-collapsed .matrix-container .legend {
+    display: none !important;
+  }
+
+  /* Полоса с бейджами — в шапке, горизонтальный ряд, скрыта когда матрица развёрнута */
+  .matrix-collapsed-strip {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+  }
+  /* В collapsed-режиме — показываем в шапке */
+  .matrix-collapsed .matrix-collapsed-strip {
+    display: flex;
+  }
+
+  /* Бейджи — квадратные, как кнопка-тоггл, с тултипом при наведении */
+  .zone-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.20);
+    cursor: default;
+    pointer-events: auto; /* разрешаем события чтобы работал title-тултип */
+  }
+
+  /* ── Expanded/collapsed боковая панель ── */
+
+  /* По умолчанию sidebar — обычная колонка справа */
+  .sidebar {
+    flex: 1 1 270px;
+    min-width: 240px;
+  }
+
+  /* В обычном режиме обёртки прозрачны — дети ведут себя как прямые дети sidebar */
+  .sidebar-form-col { display: contents; }
+  .sidebar-list-col { display: contents; }
+
+  /* ── Collapsed-режим ── */
+
+  /* grid-section: не переносим, полоса слева — без центрирования */
+  .matrix-collapsed .grid-section {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 16px;
+  }
+
+  /* sidebar занимает всё оставшееся место */
+  .matrix-collapsed .sidebar {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  /* Левая колонка: форма + toolbar — широкая, sticky */
+  .matrix-collapsed .sidebar-form-col {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 650px;
+    width: 650px;
+    position: sticky;
+    top: 70px; /* 54px шапка + 16px зазор */
+    align-self: flex-start;
+  }
+
+  /* Правая колонка: табы + список — выравнивание по верху задаётся через JS */
+  .matrix-collapsed .sidebar-list-col {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 700px;
+    width: 700px;
+    padding-top: 0;
+  }
+  .matrix-collapsed .list-tabs { margin-top: 0; }
+
+  /* Toolbar в collapsed-режиме: текст видим, одна строка */
+  .matrix-collapsed .toolbar {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  /* В collapsed-режиме (≥1080px) тексты кнопок всегда видны */
+  .matrix-collapsed .toolbar .btn-text { display: inline !important; }
+  .matrix-collapsed .toolbar .tool-btn  { padding: 0 12px !important; gap: 6px !important; }
+
+  /* ── Адаптив collapsed: <1400px — колонки уже, текст кнопок скрываем ── */
+  @media (max-width: 1400px) {
+    .matrix-collapsed .sidebar-form-col { flex: 0 0 550px; width: 550px; }
+    .matrix-collapsed .sidebar-list-col { flex: 0 0 600px; width: 600px; }
+    .matrix-collapsed .sidebar { gap: 16px; }
+    /* toolbar — только иконки */
+    .matrix-collapsed .toolbar .btn-text { display: none !important; }
+    .matrix-collapsed .toolbar .tool-btn  { padding: 0 10px !important; gap: 0 !important; }
+    /* сортировка — только иконки */
+    .matrix-collapsed .sort-bar .btn-text { display: none; }
+    .matrix-collapsed .sort-bar .sort-icon { display: inline; }
+    .matrix-collapsed .sort-btn { padding: 0 10px; }
+    .matrix-collapsed .sort-bar { flex-wrap: nowrap; }
+  }
+
+  /* ── Адаптив collapsed: <1200px — колонки ещё уже ── */
+  @media (max-width: 1200px) {
+    .matrix-collapsed .sidebar-form-col { flex: 0 0 450px; width: 450px; }
+    .matrix-collapsed .sidebar-list-col { flex: 0 0 500px; width: 500px; }
+    .matrix-collapsed .sidebar { gap: 12px; }
+  }
+
+  /* ── Адаптив collapsed: <1080px — одна колонка, бейджи горизонтально наверху ── */
+  @media (max-width: 1080px) {
+    .matrix-collapsed .sidebar {
+      flex-direction: column;
+      gap: 0;
+      align-items: stretch;
+    }
+    .matrix-collapsed .sidebar-form-col {
+      flex: unset; width: auto;
+      position: static;
+      align-self: auto;
+    }
+    .matrix-collapsed .sidebar-list-col {
+      flex: unset; width: auto;
+      padding-top: 0 !important;
+    }
+    .matrix-collapsed .list-tabs { margin-top: 10px; }
+    /* toolbar — кнопки без текста, одна строка */
+    .matrix-collapsed .toolbar .btn-text { display: none !important; }
+    .matrix-collapsed .toolbar .tool-btn  { padding: 0 10px !important; gap: 0 !important; }
+    .matrix-collapsed .toolbar { flex-wrap: nowrap; }
+  .matrix-collapsed .grid-section { gap: 12px; }
+  }
+
+  /* Кнопки без текста — только когда матрица развёрнута */
+  @media (max-width: 1520px) {
+    body:not(.matrix-collapsed) .btn-text { display: none; }
+    body:not(.matrix-collapsed) .sort-icon { display: inline; }
+    body:not(.matrix-collapsed) .tool-btn { padding: 0 10px; gap: 0; }
+    body:not(.matrix-collapsed) .sort-btn { padding: 0 10px; }
+    body:not(.matrix-collapsed) .toolbar { flex-wrap: nowrap; }
+    body:not(.matrix-collapsed) .sort-bar { flex-wrap: nowrap; }
+  }
   @media (max-width: 768px) {
     .left-axis { display: none; }
     .bottom-axis-label { display: none; }
     .bottom-row { display: none; }
     .legend { margin-left: 0; justify-content: center; }
-    body { padding: 12px; }
+    body { padding: 12px; padding-top: 54px; }
     .grid-section { gap: 16px; }
     .matrix-container { flex-basis: 100%; min-width: 0; }
     .sidebar { flex-basis: 100%; min-width: 0; }
     .toolbar { gap: 6px; }
     .tool-btn { font-size: 12px; padding: 0 10px; height: 32px; }
     .scroll-top { left: 12px; bottom: 56px; }
+    .matrix-collapsed .matrix-container { flex: 0 0 0px; min-width: 0; max-width: 0; overflow: hidden; padding: 0; }
+    .matrix-collapsed .sidebar { flex-direction: column; gap: 0; align-items: stretch; }
+    .matrix-collapsed .sidebar-form-col { display: flex; flex-direction: column; flex: unset; width: auto; position: static; align-self: auto; }
+    .matrix-collapsed .sidebar-list-col { display: flex; flex-direction: column; flex: unset; width: auto; padding-top: 0 !important; }
+    .matrix-collapsed .list-tabs { margin-top: 10px; }
+    .matrix-collapsed .grid-section { flex-wrap: nowrap; justify-content: flex-start; gap: 0; }
+    .matrix-collapsed .toolbar { flex-wrap: nowrap; }
+    .matrix-collapsed .toolbar .btn-text { display: none !important; }
+    .matrix-collapsed .toolbar .tool-btn { padding: 0 10px !important; gap: 0 !important; }
+    .matrix-container { flex-basis: 100%; min-width: 0; }
+    .sidebar { flex-basis: 100%; min-width: 0; }
   }
 
-  /* Кнопки из значков на небольших экранах */
-  @media (max-width: 1472px) {
-    .btn-text { display: none; }
-    .sort-icon { display: inline; }
-    .tool-btn { padding: 0 10px; gap: 0; }
-    .sort-btn { padding: 0 10px; }
-    .toolbar { flex-wrap: nowrap; }
-    .sort-bar { flex-wrap: nowrap; }
-  }
 
   /* Мобилка */
   @media (max-width: 480px) {
@@ -292,10 +536,25 @@
   .custom-select-option.selected .cs-percent { color: rgba(33,150,243,0.7); }
 
   /* Footer */
-  .footer { margin-top: 36px; padding: 12px 0; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
+  .footer { margin-top: auto; padding: 12px 0; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
   .footer a { color: var(--text-muted); text-decoration: none; }
   .footer a:hover { color: var(--text-secondary); text-decoration: underline; }
   .footer-dot { opacity: 0.7; font-size: 15px; }
+
+  /* Горячие клавиши */
+  #hotkey-hint { display: none; }
+  #hotkey-hint.open { display: block; }
+  .hotkey-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 400; display: flex; align-items: center; justify-content: center; }
+  .hotkey-modal { background: var(--bg-modal); border-radius: 12px; padding: 24px; width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+  .hotkey-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .hotkey-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .hotkey-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 12px; margin-bottom: 4px; }
+  .hotkey-section-title:first-child { margin-top: 0; }
+  .hotkey-list { display: flex; flex-direction: column; gap: 2px; }
+  .hotkey-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--border-light); }
+  .hotkey-row:last-child { border-bottom: none; }
+  .hotkey-keys { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  kbd { display: inline-flex; align-items: center; justify-content: center; padding: 2px 7px; border-radius: 5px; border: 1.5px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-size: 11px; font-family: inherit; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: nowrap; flex-shrink: 0; }
 
   /* Archive tabs */
   .list-tabs { display: flex; gap: 4px; margin-top: 10px; margin-bottom: 12px; background: var(--bg-secondary); border-radius: 8px; padding: 3px; }
@@ -318,7 +577,7 @@
     </div>
     <label>Название <span style="color:#e53935">*</span></label>
     <input type="text" id="modal-name" maxlength="80" />
-    <div class="modal-error-msg" id="modal-name-error">Нужно заполнить обязательное поле</div>
+    <div class="modal-error-msg" id="modal-name-error">У риска должно быть имя. Без названия никак</div>
     <label>Вероятность (1–4)</label>
     <div class="custom-select" id="cs-modal-prob">
       <button type="button" class="custom-select-btn" onclick="toggleCustomSelect('cs-modal-prob')">
@@ -359,10 +618,52 @@
   </div>
 </div>
 
+<!-- Фиксированная шапка с кнопками управления -->
+<div class="fixed-header" id="fixed-header">
+  <button class="matrix-toggle-btn" id="matrix-toggle-btn" onclick="toggleMatrix()" title="Свернуть матрицу">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill="#888"/>
+      <rect x="7.5" y="1" width="5.5" height="5.5" rx="1.5" fill="#444"/>
+      <rect x="1" y="7.5" width="5.5" height="5.5" rx="1.5" fill="#ccc"/>
+      <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1.5" fill="#aaa"/>
+    </svg>
+  </button>
+  <div class="matrix-collapsed-strip" id="matrix-collapsed-strip">
+    <div class="zone-badge" id="zone-badge-crit" style="background:#b71c1c" title="Критический">0</div>
+    <div class="zone-badge" id="zone-badge-high" style="background:#e65100" title="Высокий">0</div>
+    <div class="zone-badge" id="zone-badge-mid" style="background:#f9a825" title="Средний">0</div>
+    <div class="zone-badge" id="zone-badge-low" style="background:#4caf50" title="Низкий">0</div>
+  </div>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Переключить тему">
+    <div class="theme-toggle-knob" id="theme-toggle-knob">
+      <!-- Солнце (светлая тема) -->
+      <svg class="ti-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="4"/>
+        <line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/>
+        <line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/>
+      </svg>
+      <!-- Луна (тёмная тема) -->
+      <svg class="ti-moon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+        <!-- Полумесяц -->
+        <path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/>
+        <!-- Звёзды -->
+        <circle cx="18" cy="5" r="0.9"/>
+        <circle cx="21" cy="9" r="0.7"/>
+        <circle cx="20" cy="2.5" r="0.6"/>
+      </svg>
+    </div>
+    <div class="theme-toggle-icons"></div>
+  </button>
+</div>
+
 <div class="wrap">
   <div class="grid-section">
 
     <div class="matrix-container">
+      <!-- Свёрнутые бейджи зон вынесены выше, прямо в body -->
+
       <!-- Matrix layout: left axis + grid area -->
       <div class="matrix-layout">
 
@@ -392,14 +693,12 @@
     </div>
 
     <div class="sidebar">
+      <div class="sidebar-form-col">
       <div class="risk-form">
-        <div class="form-header">
-          <div class="section-title">Добавить риск</div>
-          <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Переключить тему">🌙</button>
-        </div>
+        <div class="section-title" style="margin-bottom:0;">Добавить риск</div>
         <label>Название <span style="color:#e53935">*</span></label>
         <input type="text" id="risk-name" placeholder="Например: неверно считается итоговая сумма корзины" maxlength="80" />
-        <div class="error-msg" id="risk-name-error">Нужно заполнить обязательное поле</div>
+        <div class="error-msg" id="risk-name-error">У риска должно быть имя. Без названия никак</div>
         <label>Вероятность (1–4)</label>
         <div class="custom-select" id="cs-risk-prob">
           <button type="button" class="custom-select-btn" onclick="toggleCustomSelect('cs-risk-prob')">
@@ -438,12 +737,13 @@
       <div class="toolbar">
         <button class="tool-btn" id="btn-export-xlsx" onclick="exportXLSX()" title="Скачать риски как Excel-файл">⬇ <span class="btn-text">Экспорт Excel</span></button>
         <label class="tool-btn" id="btn-import-xlsx" title="Загрузить риски из Excel-файла">⬆ <span class="btn-text">Импорт Excel</span><input type="file" accept=".xlsx" onchange="importXLSX(event)" style="display:none"></label>
-
         <button class="tool-btn" onclick="exportPNG()" title="Скачать матрицу как картинку">🖼 <span class="btn-text">Экспорт PNG</span></button>
         <button class="tool-btn" onclick="exportHTML()" title="Скачать HTML-файл с текущими рисками">📄 <span class="btn-text">Поделиться</span></button>
         <button class="tool-btn danger" onclick="clearAll()" title="Удалить все риски">✕ <span class="btn-text">Очистить</span></button>
       </div>
       <div class="import-error" id="import-error"></div>
+      </div><!-- /sidebar-form-col -->
+      <div class="sidebar-list-col">
       <div class="list-tabs">
         <button class="list-tab active" id="tab-active" onclick="switchTab('active')" title="Активные риски">Активные <span class="archive-badge" id="tab-active-count">0</span></button>
         <button class="list-tab" id="tab-archive" onclick="switchTab('archive')" title="Закрытые риски">Архив <span class="archive-badge" id="tab-archive-count">0</span></button>
@@ -498,11 +798,12 @@
         </div>
       </div>
       <div class="risk-list" id="risk-list"></div>
-    </div>
+      </div><!-- /sidebar-list-col -->
+    </div><!-- /sidebar -->
 
   </div>
   <div class="footer">
-    <span>© 2026 <a href="https://github.com/kinocenitel" target="_blank" rel="noopener" title="GitHub — профиль">Bondarenko</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/LICENSE" target="_blank" rel="noopener" title="GitHub — лицензия">MIT License</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/CHANGELOG.md" target="_blank" rel="noopener" title="GitHub — Changelog">v1.0.1</a></span>
+    <span>© 2026 <a href="https://github.com/kinocenitel" target="_blank" rel="noopener" title="GitHub — профиль">Bondarenko</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/LICENSE" target="_blank" rel="noopener" title="GitHub — лицензия">MIT License</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/CHANGELOG.md" target="_blank" rel="noopener" title="GitHub — Changelog">v1.1.0</a></span>
     <div style="display:flex;align-items:center;gap:8px;">
       <a href="https://avbondarenko.yonote.ru/share/risk-matrix" target="_blank" rel="noopener" title="Гайд по матрице рисков">FAQ</a>
       <span class="footer-dot">·</span>
@@ -1208,6 +1509,12 @@ function updateButtons() {
   const isEmpty = risks.length === 0;
   const isFilteredEmpty = !isEmpty && getFilteredRisks().length === 0;
   const disableAll = isEmpty || isFilteredEmpty;
+  const atLimit = risks.length >= 100;
+  // Кнопка «Добавить» — при лимите визуально сигнализируем, но не блокируем (ошибка показывается внутри addRisk)
+  const addBtn = document.querySelector('.add-btn');
+  if (addBtn) {
+    addBtn.title = atLimit ? 'Становится тесно — максимум 100 рисков' : '';
+  }
   document.querySelector('[onclick="clearAll()"]').disabled = disableAll;
   const exportXlsxBtn = document.getElementById('btn-export-xlsx'); if (exportXlsxBtn) exportXlsxBtn.disabled = disableAll;
   document.querySelector('[onclick="exportPNG()"]').disabled = disableAll;
@@ -1225,7 +1532,9 @@ function updateButtons() {
       btn.classList.toggle('active', m === activeMode);
     }
   });
-  document.getElementById('filter-btn').disabled = currentTab === 'archive' ? false : isEmpty;
+  document.getElementById('filter-btn').disabled = currentTab === 'archive'
+    ? archivedRisks.length <= 1
+    : isEmpty;
 }
 
 function switchTab(tab) {
@@ -1269,12 +1578,17 @@ function openDeleteRisk(id) {
   deletingRiskId = id;
   const r = risks.find(x => x.id === id);
   if (!r) return;
-  document.getElementById('delete-risk-modal').classList.add('open');
+  const m = document.getElementById('delete-risk-modal');
+  m.classList.add('open');
   document.body.style.overflow = 'hidden';
+  trapFocus(m);
+  setTimeout(() => m.querySelector('button')?.focus(), 50);
 }
 
 function closeDeleteRisk() {
-  document.getElementById('delete-risk-modal').classList.remove('open');
+  const m = document.getElementById('delete-risk-modal');
+  releaseFocus(m);
+  m.classList.remove('open');
   deletingRiskId = null;
   document.body.style.overflow = '';
 }
@@ -1313,10 +1627,13 @@ function restoreRisk(id) {
 }
 
 function render() {
-  buildGrid();
-  buildLeftAxis();
-  buildBottomAxis();
+  if (!matrixCollapsed) {
+    buildGrid();
+    buildLeftAxis();
+    buildBottomAxis();
+  }
   buildList();
+  updateZoneBadges();
 }
 
 // ===================== TAGS =====================
@@ -1391,9 +1708,10 @@ function initTagInput(wrapId, inputId, autocompleteId, getTagsFn, setTagsFn) {
   function addTag(val) {
     const tag = val.trim().replace(/,+$/, '').trim().toLowerCase();
     if (!tag) return;
+    if (tag.length > 25) { hideAC(); showTagError(`Краткость — сестра тегов. Максимум 25 символов, сейчас — ${tag.length}`); return; }
     const arr = getTagsFn();
-    if (arr.includes(tag)) { input.value = ''; hideAC(); showTagError('Такой тег уже добавлен'); return; }
-    if (arr.length >= 4) { input.value = ''; hideAC(); showTagError('Максимальное количество тегов — 4'); return; }
+    if (arr.includes(tag)) { input.value = ''; hideAC(); showTagError('Такой тег уже есть в списке'); return; }
+    if (arr.length >= 4) { input.value = ''; hideAC(); showTagError('Максимальное кол-во тегов — 4. Выбери самые важные'); return; }
     arr.push(tag);
     setTagsFn(arr);
     input.value = '';
@@ -1681,7 +1999,20 @@ function addRisk() {
   if (!name) {
     nameInput.classList.add('error');
     errorMsg.classList.add('visible');
+    errorMsg.textContent = 'У риска должно быть имя. Без названия никак';
     nameInput.focus();
+    return;
+  }
+  if (risks.length >= 100) {
+    nameInput.classList.add('error');
+    errorMsg.classList.add('visible');
+    errorMsg.textContent = 'Становится тесно — максимум 100 рисков';
+    nameInput.focus();
+    clearTimeout(nameInput._limitTimer);
+    nameInput._limitTimer = setTimeout(() => {
+      nameInput.classList.remove('error');
+      errorMsg.classList.remove('visible');
+    }, 3000);
     return;
   }
   nameInput.classList.remove('error');
@@ -1722,6 +2053,24 @@ function removeRisk(id) {
   risks = risks.filter(r => r.id !== id);
   saveToStorage();
   render();
+}
+
+// ── Фокус-ловушка для модалок (глобальные функции) ──
+function trapFocus(modal) {
+  const focusable = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+  const handler = e => {
+    if (e.key !== 'Tab') return;
+    const els = [...modal.querySelectorAll(focusable)].filter(el => el.offsetParent !== null);
+    if (!els.length) return;
+    const first = els[0], last = els[els.length - 1];
+    if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+    else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
+  };
+  modal._trapHandler = handler;
+  modal.addEventListener('keydown', handler);
+}
+function releaseFocus(modal) {
+  if (modal._trapHandler) modal.removeEventListener('keydown', modal._trapHandler);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1779,13 +2128,238 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.custom-select-btn.open').forEach(b => b.classList.remove('open'));
     }
   });
+  // ── 1. Навигация по custom select стрелками ──
+  document.querySelectorAll('.custom-select').forEach(wrap => {
+    const btn  = wrap.querySelector('.custom-select-btn');
+    const list = wrap.querySelector('.custom-select-list');
+    const opts = () => [...wrap.querySelectorAll('.custom-select-option:not([style*="display:none"])')];
+    btn.addEventListener('keydown', e => {
+      const isOpen = list.classList.contains('open');
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!isOpen) { toggleCustomSelect(wrap.id); }
+        const items = opts();
+        const cur = items.findIndex(o => o.classList.contains('selected'));
+        const next = e.key === 'ArrowDown'
+          ? Math.min(cur + 1, items.length - 1)
+          : Math.max(cur - 1, 0);
+        items[next]?.focus();
+      }
+      if ((e.key === 'Enter' || e.key === ' ') && !isOpen) {
+        e.preventDefault();
+        toggleCustomSelect(wrap.id);
+        setTimeout(() => opts().find(o => o.classList.contains('selected'))?.focus(), 0);
+      }
+      if (e.key === 'Escape') {
+        list.classList.remove('open'); btn.classList.remove('open'); btn.focus();
+      }
+    });
+    // Навигация внутри открытого списка
+    list.addEventListener('keydown', e => {
+      const items = opts();
+      const cur = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); items[Math.min(cur + 1, items.length - 1)]?.focus(); }
+      if (e.key === 'ArrowUp')   { e.preventDefault(); items[Math.max(cur - 1, 0)]?.focus(); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        document.activeElement?.click();
+        btn.focus();
+      }
+      if (e.key === 'Escape') {
+        list.classList.remove('open'); btn.classList.remove('open'); btn.focus();
+      }
+      if (e.key === 'Tab') {
+        list.classList.remove('open'); btn.classList.remove('open');
+      }
+    });
+    // Пункты списка должны быть фокусируемы
+    wrap.querySelectorAll('.custom-select-option').forEach(o => {
+      if (!o.hasAttribute('tabindex')) o.setAttribute('tabindex', '-1');
+    });
+  });
+
+  // ── 2. Кнопка «Импорт Excel» (label) — tabindex и Enter/Space ──
+  const importLabel = document.getElementById('btn-import-xlsx');
+  if (importLabel) {
+    importLabel.setAttribute('tabindex', '0');
+    importLabel.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        importLabel.querySelector('input[type=file]')?.click();
+      }
+    });
+  }
+
+  // ── 3. Фокус-ловушка для модалок — функции уже глобальные (определены ниже) ──
+  // Патчим open/close функции
+  const _openModal = openModal;
+  openModal = function(id) {
+    _openModal(id);
+    const m = document.getElementById('edit-modal');
+    trapFocus(m);
+    setTimeout(() => m.querySelector('input, button')?.focus(), 50);
+  };
+  const _closeModal = closeModal;
+  closeModal = function() {
+    releaseFocus(document.getElementById('edit-modal'));
+    _closeModal();
+  };
+  const _clearAll = clearAll;
+  clearAll = function() {
+    _clearAll();
+    const m = document.getElementById('confirm-modal');
+    trapFocus(m);
+    setTimeout(() => m.querySelector('button')?.focus(), 50);
+  };
+  const _closeConfirm = closeConfirm;
+  closeConfirm = function() {
+    releaseFocus(document.getElementById('confirm-modal'));
+    _closeConfirm();
+  };
+
+  // ── 4. Горячие клавиши ──
+  function openHotkeyHint() {
+    const el = document.getElementById('hotkey-hint');
+    el.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    const overlay = document.getElementById('hotkey-overlay');
+    trapFocus(overlay);
+    setTimeout(() => overlay.querySelector('.modal-close')?.focus(), 50);
+  }
+  function closeHotkeyHint() {
+    const overlay = document.getElementById('hotkey-overlay');
+    if (overlay) releaseFocus(overlay);
+    document.getElementById('hotkey-hint').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  const hotkeyHint = document.createElement('div');
+  hotkeyHint.id = 'hotkey-hint';
+  hotkeyHint.innerHTML = `
+    <div class="hotkey-overlay" id="hotkey-overlay">
+      <div class="hotkey-modal">
+        <div class="hotkey-header">
+          <span class="hotkey-title">Горячие клавиши</span>
+          <button class="modal-close" onclick="document.querySelector('#hotkey-hint').classList.remove('open');document.body.style.overflow=''">✕</button>
+        </div>
+        <div class="hotkey-list">
+          <div class="hotkey-section-title">Действия</div>
+          <div class="hotkey-row"><span>Новый риск</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>N</kbd></div></div>
+          <div class="hotkey-row"><span>Скрыть / показать матрицу</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>M</kbd></div></div>
+          <div class="hotkey-row"><span>Сменить тему</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>T</kbd></div></div>
+          <div class="hotkey-row"><span>Импорт Excel</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>I</kbd></div></div>
+          <div class="hotkey-row"><span>Экспорт Excel</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>E</kbd></div></div>
+          <div class="hotkey-row"><span>Экспорт PNG</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>P</kbd></div></div>
+          <div class="hotkey-row"><span>Экспорт HTML</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>H</kbd></div></div>
+          <div class="hotkey-row"><span>Открыть фильтры</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>F</kbd></div></div>
+          <div class="hotkey-row"><span>Сбросить фильтры</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>R</kbd></div></div>
+          <div class="hotkey-row"><span>Переключить вкладку</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>A</kbd></div></div>
+          <div class="hotkey-row"><span>Переключить сортировку</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>S</kbd></div></div>
+          <div class="hotkey-row"><span>Очистить список</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>Del</kbd></div></div>
+          <div class="hotkey-section-title">Навигация</div>
+          <div class="hotkey-row"><span>Следующий элемент</span><div class="hotkey-keys"><kbd>Tab</kbd></div></div>
+          <div class="hotkey-row"><span>Предыдущий элемент</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>Tab</kbd></div></div>
+          <div class="hotkey-row"><span>Навигация по списку</span><div class="hotkey-keys"><kbd>↑</kbd><kbd>↓</kbd></div></div>
+          <div class="hotkey-row"><span>Выбрать / подтвердить</span><div class="hotkey-keys"><kbd>Enter</kbd></div></div>
+          <div class="hotkey-row"><span>Закрыть / сбросить</span><div class="hotkey-keys"><kbd>Esc</kbd></div></div>
+          <div class="hotkey-row"><span>Эта панель</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>?</kbd></div></div>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(hotkeyHint);
+
+  document.addEventListener('keydown', e => {
+    // Закрыть hotkey-hint по Escape
+    if (e.key === 'Escape' && document.getElementById('hotkey-hint').classList.contains('open')) {
+      closeHotkeyHint(); return;
+    }
+    const tag = document.activeElement?.tagName;
+    const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || document.activeElement?.isContentEditable;
+    const modalOpen = ['edit-modal','confirm-modal','delete-risk-modal'].some(id => document.getElementById(id)?.classList.contains('open'));
+    const hotkeyOpen = document.getElementById('hotkey-hint').classList.contains('open');
+    if (inInput || modalOpen || hotkeyOpen) return;
+
+    if (e.shiftKey && e.code === 'KeyT') {
+      e.preventDefault();
+      toggleTheme();
+    }
+    if (e.shiftKey && e.code === 'KeyM') {
+      e.preventDefault();
+      toggleMatrix();
+    }
+    if (e.shiftKey && (e.code === 'Slash' || e.code === 'Digit1')) {
+      e.preventDefault();
+      openHotkeyHint();
+    }
+    if (e.shiftKey && e.code === 'KeyN') {
+      e.preventDefault();
+      document.getElementById('risk-name')?.focus();
+      document.getElementById('risk-name')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    if (e.shiftKey && e.code === 'KeyE') {
+      e.preventDefault();
+      exportXLSX();
+    }
+    if (e.shiftKey && e.code === 'KeyH') {
+      e.preventDefault();
+      exportHTML();
+    }
+    if (e.shiftKey && e.code === 'KeyP') {
+      e.preventDefault();
+      exportPNG();
+    }
+    if (e.shiftKey && e.code === 'KeyI') {
+      e.preventDefault();
+      document.getElementById('btn-import-xlsx')?.querySelector('input[type=file]')?.click();
+    }
+    if (e.shiftKey && (e.code === 'Delete' || e.code === 'Backspace')) {
+      e.preventDefault();
+      clearAll();
+    }
+    if (e.shiftKey && e.code === 'KeyF') {
+      e.preventDefault();
+      const btn = document.getElementById('filter-btn');
+      if (btn && !btn.disabled) { toggleFilter(); btn.focus(); }
+    }
+    if (e.shiftKey && e.code === 'KeyR') {
+      e.preventDefault();
+      resetAllFilters();
+    }
+    if (e.shiftKey && e.code === 'KeyA') {
+      e.preventDefault();
+      const next = currentTab === 'active' ? 'archive' : 'active';
+      switchTab(next);
+      document.getElementById(next === 'archive' ? 'tab-archive' : 'tab-active')?.focus();
+    }
+    if (e.shiftKey && e.code === 'KeyS') {
+      e.preventDefault();
+      const tab = currentTab;
+      if (tab === 'archive') {
+        const modes = ['default', 'desc', 'asc'];
+        const next = modes[(modes.indexOf(archiveSort) + 1) % modes.length];
+        setArchiveSort(next);
+      } else {
+        const modes = ['default', 'desc', 'asc'];
+        const next = modes[(modes.indexOf(currentSort) + 1) % modes.length];
+        setSort(next);
+      }
+    }
+  });
+
+  document.getElementById('hotkey-overlay')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('hotkey-overlay')) closeHotkeyHint();
+  });
+
   render();
+  applyMatrixCollapse(false);
   initFormTagInput();
   document.body.style.visibility = 'visible';
 });
 
 // Повторная отрисовка при изменении размера
-window.addEventListener('resize', () => { buildGrid(); });
+window.addEventListener('resize', () => {
+  if (!matrixCollapsed) buildGrid();
+});
 
 function exportXLSX() {
   const PROB_LABELS = {1:'Маловероятно',2:'Иногда',3:'Часто',4:'Почти наверняка'};
@@ -2061,6 +2635,70 @@ function exportHTML() {
   a.click();
 }
 
+
+// ── Матрица: сворачивание / разворачивание ──
+const LS_MATRIX_COLLAPSED = 'rm_matrix_collapsed';
+let matrixCollapsed = localStorage.getItem(LS_MATRIX_COLLAPSED) === '1';
+
+function updateZoneBadges() {
+  const counts = { crit: 0, high: 0, mid: 0, low: 0 };
+  risks.forEach(r => {
+    const s = r.prob * r.sev;
+    if (s >= 12) counts.crit++;
+    else if (s >= 9) counts.high++;
+    else if (s >= 4) counts.mid++;
+    else counts.low++;
+  });
+  const labels = { crit: 'Критический', high: 'Высокий', mid: 'Средний', low: 'Низкий' };
+  const riskWord = (n) => n === 1 ? 'риск' : n >= 2 && n <= 4 ? 'риска' : 'рисков';
+  Object.keys(counts).forEach(id => {
+    const el = document.getElementById('zone-badge-' + id);
+    if (!el) return;
+    const n = counts[id];
+    el.textContent = n;
+    el.title = `${labels[id]}: ${n} ${riskWord(n)}`;
+  });
+}
+
+
+function applyMatrixCollapse(animate) {
+  const btn = document.getElementById('matrix-toggle-btn');
+
+  if (matrixCollapsed) {
+    document.body.classList.add('matrix-collapsed');
+    if (btn) {
+      btn.title = 'Развернуть матрицу';
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 2H2v3M9 2h3v3M5 12H2v-3M9 12h3v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+    }
+  } else {
+    document.body.classList.remove('matrix-collapsed');
+    const listCol = document.querySelector('.sidebar-list-col');
+    if (listCol) listCol.style.paddingTop = '';
+    if (btn) {
+      btn.title = 'Свернуть матрицу';
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill="#888"/>
+        <rect x="7.5" y="1" width="5.5" height="5.5" rx="1.5" fill="#444"/>
+        <rect x="1" y="7.5" width="5.5" height="5.5" rx="1.5" fill="#ccc"/>
+        <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1.5" fill="#aaa"/>
+      </svg>`;
+    }
+  }
+
+  requestAnimationFrame(() => {
+    if (animate && !matrixCollapsed) { buildGrid(); syncLeftAxis(); }
+  });
+}
+
+function toggleMatrix() {
+  matrixCollapsed = !matrixCollapsed;
+  try { localStorage.setItem(LS_MATRIX_COLLAPSED, matrixCollapsed ? '1' : '0'); } catch(e) {}
+  applyMatrixCollapse(true);
+}
+
+
 function toggleTheme() {
   // Отключите все переходы при смене темы, чтобы предотвратить мерцание
   const style = document.createElement('style');
@@ -2068,7 +2706,6 @@ function toggleTheme() {
   document.head.appendChild(style);
 
   const isDark = document.body.classList.toggle('dark');
-  document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
   localStorage.setItem('rm_theme', isDark ? 'dark' : 'light');
 
   // Повторно включите переходы после перерисовки
@@ -2084,10 +2721,6 @@ function toggleTheme() {
   if (localStorage.getItem('rm_theme') === 'dark') {
     document.body.classList.add('dark');
     document.documentElement.classList.remove('dark-early');
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('theme-toggle');
-      if (btn) btn.textContent = '☀️';
-    });
   } else {
     document.documentElement.classList.remove('dark-early');
   }
