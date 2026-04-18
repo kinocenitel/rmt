@@ -1,6 +1,4 @@
-```markdown
 [![tests](https://github.com/kinocenitel/rmt/actions/workflows/tests.yml/badge.svg)](https://github.com/kinocenitel/rmt/actions/workflows/tests.yml)
-```
 
 # Risk Matrix Tool 📊
 
