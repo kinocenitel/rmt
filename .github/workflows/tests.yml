@@ -1,0 +1,78 @@
+name: tests
+
+# Когда запускаться:
+#   push в main         — проверяем, что main не сломан
+#   pull_request в main — проверяем PR до merge
+#   workflow_dispatch   — ручной запуск из вкладки Actions
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # 1. Забираем код репозитория на виртуалку.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Ставим Python — ту же мажорную версию, что локально у тебя
+      #    (3.13). Кэшируем pip, чтобы повторные прогоны были быстрее.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+          cache-dependency-path: requirements.txt
+
+      # 3. Ставим Python-зависимости из requirements.txt.
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Кэш для браузеров Playwright. Ключ зависит от версии playwright,
+      #    прописанной в requirements.txt — если её поменять, кэш
+      #    автоматически инвалидируется, и Chromium перекачается.
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+
+      # 5. Ставим Chromium + системные либы Linux (шрифты, аудио и т.д.).
+      #    Если кэш попал — хватит только --with-deps для системных пакетов.
+      - name: Install Playwright browsers
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            playwright install-deps chromium
+          else
+            playwright install --with-deps chromium
+          fi
+
+      # 6. Собственно прогон тестов.
+      #    --screenshot=only-on-failure и --video=retain-on-failure
+      #    сохраняют скриншот и видео только для упавших тестов.
+      - name: Run pytest
+        run: |
+          python -m pytest \
+            --screenshot=only-on-failure \
+            --video=retain-on-failure \
+            --output=test-results
+
+      # 7. Если тесты упали — выкладываем артефакты (скриншоты, видео)
+      #    в прогон, чтобы их можно было скачать и посмотреть.
+      #    if: failure() — срабатывает только если предыдущий шаг упал.
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-failures
+          path: test-results/
+          retention-days: 14
