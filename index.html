@@ -25,6 +25,7 @@
     --tooltip-text: var(--text-primary);
     --btn-bg: #ffffff;
     --btn-text: #383838;
+    --icon-color: #888888;
     --cancel-hover: #f5f5f5;
     --danger-hover: #fff5f5;
     --border-hover: #a0a0a0;
@@ -46,6 +47,7 @@
     --border-light: #3a3a3a;
     --btn-bg: #2d2d2d;
     --btn-text: #d4d4d4;
+    --icon-color: #d4d4d4;
     --cancel-hover: #333333;
     --danger-hover: #2d1f1f;
     --border-hover: #666666;
@@ -66,8 +68,8 @@
   .wrap { padding: 1rem 0; font-size: 14px; color: var(--text-primary); flex: 1; display: flex; flex-direction: column; }
   /* В collapsed-режиме добавляем отступ слева под fixed-элементы (кнопка 30px + gap 12px + 12px offset = 54px) */
   /* collapsed: wrap без лишних отступов — бейджи в шапке */
-  .grid-section { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; flex: 1; padding-bottom: 32px; }
-  .matrix-container { flex: 1 1 340px; min-width: 300px; }
+  .grid-section { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; flex: 1; padding-bottom: 32px; padding-right: 8px; }
+  .matrix-container { flex: 0.75 1 340px; min-width: 300px; }
 
   .matrix-layout { display: flex; gap: 0; }
   .left-axis { display: flex; align-items: stretch; justify-content: center; gap: 4px; flex-direction: row; width: 60px; flex-shrink: 0; overflow: visible; }
@@ -110,9 +112,10 @@
   .risk-list { display: flex; flex-direction: column; gap: 6px; }
   .sort-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
   .filter-wrap { position: relative; margin-left: auto; }
-  .filter-btn { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: color 0.15s, border-color 0.15s, background 0.15s; flex-shrink: 0; position: relative; }
-  .filter-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+  .filter-btn { width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--icon-color); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: color 0.15s, border-color 0.15s, background 0.15s; flex-shrink: 0; position: relative; }
+  .filter-btn:not(:disabled):not(.active):hover { background: var(--bg-hover); border-color: var(--border-hover); }
   .filter-btn.active { color: #2196f3; border-color: #2196f3; background: rgba(33,150,243,0.08); }
+  .filter-btn.active svg path { fill: currentColor; }
   .filter-btn.active::after { content: ""; position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; background: #e53935; border-radius: 50%; border: 1.5px solid var(--bg); }
   .filter-wrap { position: relative; margin-left: auto; }
   .filter-dropdown { position: absolute; right: 0; top: calc(100% + 6px); background: var(--bg-modal); border: 1.5px solid var(--border); border-radius: 8px; padding: 8px; display: none; flex-direction: column; gap: 4px; z-index: 50; min-width: 140px; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
@@ -126,15 +129,16 @@
   .filter-reset-btn { width: 100%; margin-top: 6px; padding: 5px 0; font-size: 12px; font-family: inherit; background: none; border: 1.5px solid var(--border); border-radius: 6px; color: var(--text-muted); cursor: pointer; transition: color 0.15s, border-color 0.15s; }
   .filter-reset-btn:hover { color: #e53935; border-color: #e53935; }
   .sort-label { font-size: 12px; color: var(--text-secondary); }
-  .sort-btn { height: 28px; padding: 0 10px; font-size: 12px; font-family: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--btn-text); }
-  .sort-btn:hover { background: var(--bg-hover); }
+  .sort-btn { height: 28px; padding: 0 10px; font-size: 12px; font-family: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--btn-text); display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+  .sort-btn:not(:disabled):not(.active):hover { background: var(--bg-hover); border-color: var(--border-hover); }
   .sort-btn.active { background: #2196f3; color: #fff; border-color: #2196f3; }
-  .sort-icon { display: none; }
-  .sort-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .sort-btn.active .sort-icon { color: #fff; }
+  .sort-icon { display: none; line-height: 0; color: var(--icon-color); }
+  .sort-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .drag-handle { display: flex; align-items: center; color: var(--text-muted); cursor: grab; opacity: 0; transition: opacity 0.15s; font-size: 14px; padding: 0 4px 0 0; flex-shrink: 0; user-select: none; line-height: 1; letter-spacing: -1px; }
   .risk-item:hover .drag-handle { opacity: 1; }
-  .single-item .drag-handle { display: none; }
-  .no-drag .drag-handle { display: none; }
+
+  .no-drag .drag-handle { visibility: hidden; pointer-events: none; }
   .risk-item.dragging { opacity: 0.4; background: var(--bg-hover); }
   .risk-item.drag-over-top { border-top: 2px solid #2196f3; }
   .risk-item.drag-over-bottom { border-bottom: 2px solid #2196f3; }
@@ -206,11 +210,13 @@
   .modal-cancel:hover { background: var(--cancel-hover); }
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
   .tool-btn { height: 34px; padding: 0 14px; font-size: 13px; font-family: inherit; cursor: pointer; border-radius: 8px; border: 1.5px solid var(--border); background: var(--btn-bg); color: var(--btn-text); display: flex; align-items: center; gap: 6px; }
-  .tool-btn:hover { background: var(--bg-hover); border-color: var(--border-hover, var(--border)); }
+  .tool-btn svg { color: var(--icon-color); }
+  .tool-btn:not(:disabled):hover { background: var(--bg-hover); border-color: var(--border-hover, var(--border)); }
   .tool-btn.danger { border-color: #e53935; color: #e53935; }
-  .tool-btn.danger:hover { background: var(--danger-hover); }
-  .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-  .filter-btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+  .tool-btn.danger svg { color: #e53935; }
+  .tool-btn.danger:not(:disabled):hover { background: var(--danger-hover); border-color: #e53935; }
+  .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .filter-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .filter-btn:disabled.active { background: var(--btn-bg); color: var(--text-muted); border-color: var(--border); }
   .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 310; align-items: center; justify-content: center; }
   .confirm-overlay.open { display: flex; }
@@ -249,7 +255,7 @@
     border-radius: 8px;
     border: 1.5px solid var(--border);
     background: var(--btn-bg);
-    color: var(--text-muted);
+    color: var(--icon-color);
     cursor: pointer;
     font-size: 14px;
     display: flex; align-items: center; justify-content: center;
@@ -375,6 +381,7 @@
 
   /* grid-section: не переносим, полоса слева — без центрирования */
   .matrix-collapsed .grid-section {
+    padding-right: 0;
     flex-wrap: nowrap;
     align-items: flex-start;
     justify-content: flex-start;
@@ -417,22 +424,19 @@
     flex-wrap: nowrap;
     gap: 6px;
   }
-  /* В collapsed-режиме (≥1080px) тексты кнопок всегда видны */
-  .matrix-collapsed .toolbar .btn-text { display: inline !important; }
-  .matrix-collapsed .toolbar .tool-btn  { padding: 0 12px !important; gap: 6px !important; }
+  /* В collapsed-режиме тулбар — только иконки, кнопки квадратные 34×34 */
+  .matrix-collapsed .toolbar .btn-text { display: none !important; }
+  .matrix-collapsed .toolbar .tool-btn  { width: 34px; padding: 0 !important; gap: 0 !important; justify-content: center; }
 
-  /* ── Адаптив collapsed: <1400px — колонки уже, текст кнопок скрываем ── */
+  /* ── Адаптив collapsed: <1400px — колонки уже ── */
   @media (max-width: 1400px) {
     .matrix-collapsed .sidebar-form-col { flex: 0 0 550px; width: 550px; }
     .matrix-collapsed .sidebar-list-col { flex: 0 0 600px; width: 600px; }
     .matrix-collapsed .sidebar { gap: 16px; }
-    /* toolbar — только иконки */
-    .matrix-collapsed .toolbar .btn-text { display: none !important; }
-    .matrix-collapsed .toolbar .tool-btn  { padding: 0 10px !important; gap: 0 !important; }
     /* сортировка — только иконки */
     .matrix-collapsed .sort-bar .btn-text { display: none; }
     .matrix-collapsed .sort-bar .sort-icon { display: inline; }
-    .matrix-collapsed .sort-btn { padding: 0 10px; }
+    .matrix-collapsed .sort-btn { width: 28px; padding: 0; }
     .matrix-collapsed .sort-bar { flex-wrap: nowrap; }
   }
 
@@ -460,9 +464,6 @@
       padding-top: 0 !important;
     }
     .matrix-collapsed .list-tabs { margin-top: 10px; }
-    /* toolbar — кнопки без текста, одна строка */
-    .matrix-collapsed .toolbar .btn-text { display: none !important; }
-    .matrix-collapsed .toolbar .tool-btn  { padding: 0 10px !important; gap: 0 !important; }
     .matrix-collapsed .toolbar { flex-wrap: nowrap; }
   .matrix-collapsed .grid-section { gap: 12px; }
   }
@@ -472,11 +473,11 @@
     body:not(.matrix-collapsed) .btn-text { display: none; }
     body:not(.matrix-collapsed) .sort-icon { display: inline; }
     body:not(.matrix-collapsed) .tool-btn { padding: 0 10px; gap: 0; }
-    body:not(.matrix-collapsed) .sort-btn { padding: 0 10px; }
+    body:not(.matrix-collapsed) .sort-btn { width: 28px; padding: 0; }
     body:not(.matrix-collapsed) .toolbar { flex-wrap: nowrap; }
     body:not(.matrix-collapsed) .sort-bar { flex-wrap: nowrap; }
   }
-  @media (max-width: 768px) {
+  @media (max-width: 1200px) {
     .left-axis { display: none; }
     .bottom-axis-label { display: none; }
     .bottom-row { display: none; }
@@ -495,8 +496,6 @@
     .matrix-collapsed .list-tabs { margin-top: 10px; }
     .matrix-collapsed .grid-section { flex-wrap: nowrap; justify-content: flex-start; gap: 0; }
     .matrix-collapsed .toolbar { flex-wrap: nowrap; }
-    .matrix-collapsed .toolbar .btn-text { display: none !important; }
-    .matrix-collapsed .toolbar .tool-btn { padding: 0 10px !important; gap: 0 !important; }
     .matrix-container { flex-basis: 100%; min-width: 0; }
     .sidebar { flex-basis: 100%; min-width: 0; }
   }
@@ -539,6 +538,7 @@
   .footer { margin-top: auto; padding: 12px 0; border-top: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-muted); }
   .footer a { color: var(--text-muted); text-decoration: none; }
   .footer a:hover { color: var(--text-secondary); text-decoration: underline; }
+  .footer-faq { cursor: help; }
   .footer-dot { opacity: 0.7; font-size: 15px; }
 
   /* Горячие клавиши */
@@ -621,11 +621,11 @@
 <!-- Фиксированная шапка с кнопками управления -->
 <div class="fixed-header" id="fixed-header">
   <button class="matrix-toggle-btn" id="matrix-toggle-btn" onclick="toggleMatrix()" title="Свернуть матрицу">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill="#888"/>
-      <rect x="7.5" y="1" width="5.5" height="5.5" rx="1.5" fill="#444"/>
-      <rect x="1" y="7.5" width="5.5" height="5.5" rx="1.5" fill="#ccc"/>
-      <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1.5" fill="#aaa"/>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="1" y="1" width="5.5" height="5.5" rx="1.5" fill="currentColor"/>
+      <rect x="7.5" y="1" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity="0.4"/>
+      <rect x="1" y="7.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity="0.7"/>
+      <rect x="7.5" y="7.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity="0.55"/>
     </svg>
   </button>
   <div class="matrix-collapsed-strip" id="matrix-collapsed-strip">
@@ -669,7 +669,7 @@
 
         <!-- Left axis: label + numbers -->
         <div class="left-axis">
-          <div class="left-axis-label">(Y) Влияние →</div>
+          <div class="left-axis-label">Y — Влияние →</div>
           <div class="left-nums-col" id="left-nums-col"></div>
         </div>
 
@@ -678,7 +678,7 @@
           <div class="matrix-grid" id="matrix-grid"></div>
           <div class="bottom-row" id="bottom-nums"></div>
           <div class="bottom-axis-row">
-            <div class="bottom-axis-label">(X) Вероятность →</div>
+            <div class="bottom-axis-label">X — Вероятность →</div>
           </div>
         </div>
 
@@ -732,14 +732,14 @@
         </div>
         <div class="tag-pills-row" id="tag-pills-row"></div>
         <div class="modal-error-msg" id="tag-error"></div>
-        <button class="add-btn" onclick="addRisk()">Добавить</button>
+        <button class="add-btn" data-testid="btn-add-risk" onclick="addRisk()">Добавить</button>
       </div>
       <div class="toolbar">
-        <button class="tool-btn" id="btn-export-xlsx" onclick="exportXLSX()" title="Скачать риски как Excel-файл">⬇ <span class="btn-text">Экспорт Excel</span></button>
-        <label class="tool-btn" id="btn-import-xlsx" title="Загрузить риски из Excel-файла">⬆ <span class="btn-text">Импорт Excel</span><input type="file" accept=".xlsx" onchange="importXLSX(event)" style="display:none"></label>
-        <button class="tool-btn" onclick="exportPNG()" title="Скачать матрицу как картинку">🖼 <span class="btn-text">Экспорт PNG</span></button>
-        <button class="tool-btn" onclick="exportHTML()" title="Скачать HTML-файл с текущими рисками">📄 <span class="btn-text">Поделиться</span></button>
-        <button class="tool-btn danger" onclick="clearAll()" title="Удалить все риски">✕ <span class="btn-text">Очистить</span></button>
+        <button class="tool-btn" id="btn-export-xlsx" onclick="exportXLSX()" title="Скачать риски как Excel-файл"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8"/><path d="M4.5 6.5 8 10l3.5-3.5"/><path d="M2.5 12.5h11"/></svg> <span class="btn-text">Экспорт Excel</span></button>
+        <label class="tool-btn" id="btn-import-xlsx" title="Загрузить риски из Excel-файла"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 10V2"/><path d="M4.5 5.5 8 2l3.5 3.5"/><path d="M2.5 12.5h11"/></svg> <span class="btn-text">Импорт Excel</span><input type="file" accept=".xlsx" onchange="importXLSX(event)" style="display:none"></label>
+        <button class="tool-btn" data-testid="btn-export-png" onclick="exportPNG()" title="Скачать матрицу как картинку"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2.5" width="12" height="11" rx="1.5"/><circle cx="6" cy="6.5" r="1.25"/><path d="m2.5 11 3-3 3 3 2-2 3 3"/></svg> <span class="btn-text">Скачать PNG</span></button>
+        <button class="tool-btn" data-testid="btn-export-html" onclick="exportHTML()" title="Скачать HTML-файл с текущими рисками"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h4v4"/><path d="m13.5 2.5-5.5 5.5"/><path d="M12 9v3.5a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1H7"/></svg> <span class="btn-text">Поделиться</span></button>
+        <button class="tool-btn danger" data-testid="btn-clear-all" onclick="clearAll()" title="Удалить все риски"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5 11.5 11.5"/><path d="M11.5 4.5 4.5 11.5"/></svg> <span class="btn-text">Очистить</span></button>
       </div>
       <div class="import-error" id="import-error"></div>
       </div><!-- /sidebar-form-col -->
@@ -751,13 +751,13 @@
       <div class="section-title" style="margin-bottom:10px;">Список рисков:</div>
       <div class="sort-bar">
         <span class="sort-label">Сортировка:</span>
-        <button class="sort-btn active" id="sort-default" onclick="setSort('default')"><span class="sort-icon">≡</span><span class="btn-text"> По умолчанию</span></button>
-        <button class="sort-btn" id="sort-desc" onclick="setSort('desc')"><span class="sort-icon">↓</span><span class="btn-text"> По убыванию</span></button>
-        <button class="sort-btn" id="sort-asc" onclick="setSort('asc')"><span class="sort-icon">↑</span><span class="btn-text"> По возрастанию</span></button>
+        <button class="sort-btn active" id="sort-default" onclick="setSort('default')"><span class="sort-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><line x1="2" y1="4" x2="12" y2="4"/><line x1="2" y1="7" x2="12" y2="7"/><line x1="2" y1="10" x2="12" y2="10"/></svg></span><span class="btn-text">По умолчанию</span></button>
+        <button class="sort-btn" id="sort-desc" onclick="setSort('desc')"><span class="sort-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g stroke-width="1.75"><line x1="1.5" y1="3" x2="8" y2="3"/><line x1="1.5" y1="7" x2="6.5" y2="7"/><line x1="1.5" y1="11" x2="5" y2="11"/></g><g stroke-width="1.1"><line x1="11" y1="2" x2="11" y2="11.5"/><polyline points="9,9.5 11,12 13,9.5"/></g></svg></span><span class="btn-text">По убыванию</span></button>
+        <button class="sort-btn" id="sort-asc" onclick="setSort('asc')"><span class="sort-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g stroke-width="1.75"><line x1="1.5" y1="3" x2="5" y2="3"/><line x1="1.5" y1="7" x2="6.5" y2="7"/><line x1="1.5" y1="11" x2="8" y2="11"/></g><g stroke-width="1.1"><line x1="11" y1="12" x2="11" y2="2.5"/><polyline points="9,4.5 11,2 13,4.5"/></g></svg></span><span class="btn-text">По возрастанию</span></button>
         <div class="filter-wrap">
           <button class="filter-btn" id="filter-btn" onclick="toggleFilter()" title="Фильтр по уровню риска и тегам">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 2.5h12M3 7h8M5.5 11.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1.5 2.5H12.5L9 7.5V12H5V7.5Z"/>
             </svg>
           </button>
           <div class="filter-dropdown" id="filter-dropdown">
@@ -803,9 +803,9 @@
 
   </div>
   <div class="footer">
-    <span>© 2026 <a href="https://github.com/kinocenitel" target="_blank" rel="noopener" title="GitHub — профиль">Bondarenko</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/LICENSE" target="_blank" rel="noopener" title="GitHub — лицензия">MIT License</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/CHANGELOG.md" target="_blank" rel="noopener" title="GitHub — Changelog">v1.1.0</a></span>
+    <span>© 2026 <a href="https://github.com/kinocenitel" target="_blank" rel="noopener" title="GitHub — профиль">Bondarenko</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/LICENSE" target="_blank" rel="noopener" title="GitHub — лицензия">MIT License</a> <span class="footer-dot">·</span> <a href="https://github.com/kinocenitel/rmt/blob/main/CHANGELOG.md" target="_blank" rel="noopener" title="GitHub — Changelog">v1.2.0</a></span>
     <div style="display:flex;align-items:center;gap:8px;">
-      <a href="https://avbondarenko.yonote.ru/share/risk-matrix" target="_blank" rel="noopener" title="Гайд по матрице рисков">FAQ</a>
+      <a href="https://avbondarenko.yonote.ru/share/risk-matrix" target="_blank" rel="noopener" title="Гайд по матрице рисков" class="footer-faq">FAQ</a>
       <span class="footer-dot">·</span>
       <a href="https://t.me/qa_https" target="_blank" rel="noopener" title="Telegram">Feedback</a>
     </div>
@@ -819,7 +819,7 @@
     <div class="confirm-title">Точно удалить все риски?</div>
     <div class="confirm-text">Их нельзя будет восстановить</div>
     <div class="confirm-btns">
-<button class="confirm-ok" onclick="confirmClear()">Удалить</button>
+<button class="confirm-ok" data-testid="confirm-clear-ok" onclick="confirmClear()">Удалить</button>
     </div>
   </div>
 </div>
@@ -831,8 +831,8 @@
     <div class="confirm-title">Точно удалить этот риск?</div>
     <div class="confirm-text">Его можно добавить в архив</div>
     <div class="confirm-btns">
-      <button class="confirm-ok" onclick="confirmDeleteRisk()">Удалить</button>
-      <button class="confirm-cancel" onclick="confirmArchiveRisk()">В архив</button>
+      <button class="confirm-ok" data-testid="confirm-delete-ok" onclick="confirmDeleteRisk()">Удалить</button>
+      <button class="confirm-cancel" data-testid="confirm-delete-archive" onclick="confirmArchiveRisk()">В архив</button>
     </div>
   </div>
 </div>
@@ -1228,13 +1228,15 @@ function buildList() {
   if (currentTab === 'archive') {
     updateFilterCounts();
     if (!archivedRisks.length) {
-      list.innerHTML = '<div style="font-size:14px;color:var(--text-muted);margin-top:12px;">Архив пока пуст. Может, уже есть что закрыть?</div>';
+      list.innerHTML = '<div style="font-size:14px;color:var(--text-muted);margin-top:12px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0"><circle cx="7" cy="7" r="6"/><line x1="7" y1="6.5" x2="7" y2="10"/><circle cx="7" cy="4.5" r="0.75" fill="currentColor" stroke="none"/></svg>Архив пока пуст. Может, уже есть что закрыть?</div>';
     } else {
       filteredArchive.forEach(r => {
         const { label, color, textColor } = zoneInfo(r.prob, r.sev);
         const score = r.prob * r.sev;
         const item = document.createElement('div');
         item.className = 'risk-item';
+        item.dataset.testid = 'risk-item-archive';
+        item.dataset.riskId = r.id;
         item.style.opacity = '0.7';
         const datesText = [
           r.createdAt ? 'Добавлен: ' + formatDate(r.createdAt) : '',
@@ -1243,12 +1245,12 @@ function buildList() {
         item.innerHTML = `
           <div class="risk-badge" style="background:${dotColorById(r.id)}"></div>
           <div style="flex:1;min-width:0;">
-            <span class="risk-item-name" style="cursor:default;pointer-events:none;display:block;">${escapeHTML(r.name)}</span>
+            <span class="risk-item-name" data-testid="risk-item-name" style="cursor:default;pointer-events:none;display:block;">${escapeHTML(r.name)}</span>
             ${(r.tags && r.tags.length) ? `<div class="risk-tags">${r.tags.map(t => `<span class="risk-tag-pill">#${escapeHTML(t)}</span>`).join('')}</div>` : ''}
             ${datesText ? `<span style="font-size:11px;color:var(--text-muted);">${datesText}</span>` : ''}
           </div>
           <span class="risk-item-meta">X${r.prob}·Y${r.sev}=${score} <span style="color:${textColor};font-weight:500">${label}</span></span>
-          <span class="risk-restore" title="Восстановить">↩</span>
+          <span class="risk-restore" data-testid="risk-restore" title="Восстановить">↩</span>
         `;
         item.querySelector('.risk-restore').addEventListener('click', (e) => { e.stopPropagation(); restoreRisk(r.id); });
         list.appendChild(item);
@@ -1259,17 +1261,20 @@ function buildList() {
   }
   updateFilterCounts();
   if (!risks.length) {
-    list.innerHTML = '<div style="font-size:14px;color:var(--text-muted);margin-top:12px;">Список пока пуст. Добавим что-нибудь?</div>';
+    list.innerHTML = '<div style="font-size:14px;color:var(--text-muted);margin-top:12px;display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0"><circle cx="7" cy="7" r="6"/><line x1="7" y1="6.5" x2="7" y2="10"/><circle cx="7" cy="4.5" r="0.75" fill="currentColor" stroke="none"/></svg>Список пока пуст. Добавим что-нибудь?</div>';
     updateButtons();
     return;
   }
   const filtered = getFilteredRisks();
-  const dragEnabled = currentSort === 'default' && activeFilters.size === 0 && activeTagFilters.size === 0;
+  const dragEnabled = currentSort === 'default' && filtered.length === risks.length && filtered.length > 1;
+  list.classList.toggle('no-drag', !dragEnabled);
   filtered.forEach((r) => {
     const { label, color, textColor } = zoneInfo(r.prob, r.sev);
     const score = r.prob * r.sev;
     const item = document.createElement('div');
     item.className = 'risk-item';
+    item.dataset.testid = 'risk-item';
+    item.dataset.riskId = r.id;
     item.addEventListener('mouseenter', () => {
       const dot = document.querySelector(`.cell-dot[data-risk-id="${r.id}"]`);
       if (dot) dot.classList.add('highlighted');
@@ -1282,11 +1287,11 @@ function buildList() {
       <div class="drag-handle" title="Переместить">⠿</div>
       <div class="risk-badge" style="background:${dotColorById(r.id)}"></div>
       <div style="flex:1;min-width:0;">
-        <span class="risk-item-name" title="Редактировать">${escapeHTML(r.name)}</span>
+        <span class="risk-item-name" data-testid="risk-item-name" title="Редактировать">${escapeHTML(r.name)}</span>
         ${(r.tags && r.tags.length) ? `<div class="risk-tags">${r.tags.map(t => `<span class="risk-tag-pill">#${escapeHTML(t)}</span>`).join('')}</div>` : ''}
       </div>
       <span class="risk-item-meta">X${r.prob}·Y${r.sev}=${score} <span style="color:${textColor};font-weight:500">${label}</span></span>
-      <span class="risk-del" title="Удалить или архивировать"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <span class="risk-del" data-testid="risk-del" title="Удалить или архивировать"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
     `;
     item.querySelector('.risk-item-name').addEventListener('click', () => openModal(r.id));
     item.querySelector('.risk-del').addEventListener('click', (e) => { e.stopPropagation(); openDeleteRisk(r.id); });
@@ -1356,7 +1361,13 @@ let dragSrcId = null;
 
 function toggleFilter() {
   const dd = document.getElementById('filter-dropdown');
-  dd.classList.toggle('open');
+  const opened = dd.classList.toggle('open');
+  if (opened) {
+    // При открытии клавиатурой переводим фокус на первый пункт —
+    // чтобы можно было сразу ходить стрелками и жать Enter.
+    const first = dd.querySelector('input[type="checkbox"]');
+    if (first) setTimeout(() => first.focus(), 0);
+  }
 }
 
 function applyFilter() {
@@ -1509,11 +1520,11 @@ function updateButtons() {
   const isEmpty = risks.length === 0;
   const isFilteredEmpty = !isEmpty && getFilteredRisks().length === 0;
   const disableAll = isEmpty || isFilteredEmpty;
-  const atLimit = risks.length >= 100;
+  const atLimit = risks.length + archivedRisks.length >= 100;
   // Кнопка «Добавить» — при лимите визуально сигнализируем, но не блокируем (ошибка показывается внутри addRisk)
   const addBtn = document.querySelector('.add-btn');
   if (addBtn) {
-    addBtn.title = atLimit ? 'Становится тесно — максимум 100 рисков' : '';
+    addBtn.title = atLimit ? 'Становится тесно — максимум 100 рисков на проект (включая архив)' : '';
   }
   document.querySelector('[onclick="clearAll()"]').disabled = disableAll;
   const exportXlsxBtn = document.getElementById('btn-export-xlsx'); if (exportXlsxBtn) exportXlsxBtn.disabled = disableAll;
@@ -1534,7 +1545,7 @@ function updateButtons() {
   });
   document.getElementById('filter-btn').disabled = currentTab === 'archive'
     ? archivedRisks.length <= 1
-    : isEmpty;
+    : risks.length <= 1;
 }
 
 function switchTab(tab) {
@@ -1618,6 +1629,11 @@ function archiveRisk(id) {
 function restoreRisk(id) {
   const r = archivedRisks.find(x => x.id === id);
   if (!r) return;
+  // Защита на случай, если активных уже 100 (теоретически возможно при ручной правке localStorage)
+  if (risks.length >= 100) {
+    alert('Становится тесно — максимум 100 рисков на проект. Удалите что-нибудь насовсем, чтобы восстановить риск из архива.');
+    return;
+  }
   archivedRisks = archivedRisks.filter(x => x.id !== id);
   const { archivedAt, ...risk } = r;
   risks.push(risk);
@@ -1798,6 +1814,9 @@ function toggleTagDropdown() {
     renderTagDropdown();
     dd.style.display = 'flex';
     btn.classList.add('open');
+    // Передаём фокус на первый чекбокс тегов — чтобы работали стрелки и Enter.
+    const first = dd.querySelector('input[type="checkbox"]');
+    if (first) setTimeout(() => first.focus(), 0);
   }
 }
 
@@ -2003,10 +2022,10 @@ function addRisk() {
     nameInput.focus();
     return;
   }
-  if (risks.length >= 100) {
+  if (risks.length + archivedRisks.length >= 100) {
     nameInput.classList.add('error');
     errorMsg.classList.add('visible');
-    errorMsg.textContent = 'Становится тесно — максимум 100 рисков';
+    errorMsg.textContent = 'Становится тесно — максимум 100 рисков на проект (включая архив)';
     nameInput.focus();
     clearTimeout(nameInput._limitTimer);
     nameInput._limitTimer = setTimeout(() => {
@@ -2128,6 +2147,63 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.custom-select-btn.open').forEach(b => b.classList.remove('open'));
     }
   });
+
+  // ── Клавиатурная навигация в выпадашках фильтра ──
+  // По умолчанию Tab/Space работают из коробки, но Enter на чекбоксах
+  // не срабатывает (спецификация HTML), а стрелок вообще нет. Добавляем:
+  //   ↑/↓       — переход между фокусируемыми элементами выпадашки;
+  //   Home/End  — на первый/последний;
+  //   Enter     — клик по текущему элементу (toggle чекбокса, клик по кнопке).
+  function attachDropdownNav(dropdown) {
+    dropdown.addEventListener('keydown', e => {
+      // Защита от двойной обработки: #tag-filter-dropdown вложен внутри
+      // #filter-dropdown, и событие всплывает через оба. Обрабатываем
+      // событие только тогда, когда текущий контейнер — ближайшая
+      // "своя" выпадашка для цели события.
+      const ownerDropdown = e.target.closest(
+        '#tag-filter-dropdown, #filter-dropdown'
+      );
+      if (ownerDropdown !== dropdown) return;
+
+      // Фокусируемые элементы внутри выпадашки: чекбоксы и кнопки, которые
+      // не скрыты через display:none (актуально для «Сбросить всё»).
+      // При этом чекбоксы вложенной выпадашки теперь её и обслуживают,
+      // а в items основной их нет (фильтрация через :scope > нет, поэтому
+      // исключаем всё, что сидит во вложенном #tag-filter-dropdown).
+      const items = [...dropdown.querySelectorAll(
+        'input[type="checkbox"], button:not([style*="display:none"])'
+      )].filter(el => !el.closest('[style*="display: none"]') &&
+                      !el.closest('[style*="display:none"]') &&
+                      (dropdown.id !== 'filter-dropdown' ||
+                       !el.closest('#tag-filter-dropdown')));
+      if (!items.length) return;
+      const cur = items.indexOf(document.activeElement);
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const step = e.key === 'ArrowDown' ? 1 : -1;
+        const next = cur < 0 ? 0 : (cur + step + items.length) % items.length;
+        items[next].focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        items[0].focus();
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        items[items.length - 1].focus();
+      } else if (e.key === 'Enter') {
+        // Enter на чекбоксе штатно не срабатывает — триггерим вручную.
+        // Enter на кнопке работает из коробки, но нам нужен preventDefault,
+        // чтобы событие не всплыло до формы/страницы.
+        if (document.activeElement && items.includes(document.activeElement)) {
+          e.preventDefault();
+          document.activeElement.click();
+        }
+      }
+    });
+  }
+  attachDropdownNav(document.getElementById('filter-dropdown'));
+  attachDropdownNav(document.getElementById('tag-filter-dropdown'));
+
   // ── 1. Навигация по custom select стрелками ──
   document.querySelectorAll('.custom-select').forEach(wrap => {
     const btn  = wrap.querySelector('.custom-select-btn');
@@ -2249,7 +2325,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="hotkey-row"><span>Сменить тему</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>T</kbd></div></div>
           <div class="hotkey-row"><span>Импорт Excel</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>I</kbd></div></div>
           <div class="hotkey-row"><span>Экспорт Excel</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>E</kbd></div></div>
-          <div class="hotkey-row"><span>Экспорт PNG</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>P</kbd></div></div>
+          <div class="hotkey-row"><span>Скачать PNG</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>P</kbd></div></div>
           <div class="hotkey-row"><span>Экспорт HTML</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>H</kbd></div></div>
           <div class="hotkey-row"><span>Открыть фильтры</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>F</kbd></div></div>
           <div class="hotkey-row"><span>Сбросить фильтры</span><div class="hotkey-keys"><kbd>Shift</kbd><kbd>R</kbd></div></div>
